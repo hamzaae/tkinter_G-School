@@ -16,7 +16,7 @@ frame = tk.Frame(root, width=340, height=405,bg='white')
 frame.place(x=360)
 
 # Show logo and heading
-head = tk.Label(frame,text='ENSAH G-SCHOOL LOGIN',font=("Helvetica", "16"),bg='white')
+head = tk.Label(frame,text='ENSAH G-SCHOOL LOGIN',font=("Helvetica", 16, 'bold'),bg='white')
 head.place(x=68,y=45)
 
 logo = tk.PhotoImage(file="logo-ensah_50x50.png")
