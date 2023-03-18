@@ -1,5 +1,6 @@
 import tkinter as tk
 
+access = True
 # Create the window
 root = tk.Tk()
 root.title('G-School LOGIN')
@@ -22,7 +23,7 @@ logo = tk.PhotoImage(file="logo-ensah_50x50.png")
 img_logo = tk.Label(frame, image=logo,bg='white')
 img_logo.place(x=8, y=30)
 
-### Inputs behaviors
+### Username Input behavior
 def on_enter(e):
     user.delete(0, 'end')
 def on_leave(e):
@@ -36,7 +37,7 @@ user.place(x=30, y=130)
 user.insert(0,'Username')
 user.bind('<FocusIn>', on_enter)
 user.bind('<FocusOut>', on_leave)
-
+### Password Input behavior
 def on_enter(e):
     pswrd.delete(0, 'end')
 def on_leave(e):
@@ -52,15 +53,25 @@ pswrd.bind('<FocusOut>', on_leave)
 tk.Frame(frame,width=295, height=2,bg='black').place(x=25,y=167)
 tk.Frame(frame,width=295, height=2,bg='black').place(x=25,y=237)
 
+### sign_in behavior
+def on_signin():
+    username = user.get()
+    password = pswrd.get()
+    if access :
+        pass
+    elif ():
+        pass
+    else:
+        pass
+
+
 # Sign in and sign up buttons
-signin_btn = tk.Button(frame,width=39,pady=7,text='Sign in',bg='#6cc570',fg='white',border=0)
+signin_btn = tk.Button(frame,width=39,pady=7,text='Sign in',bg='#6cc570',fg='white',border=0, command=on_signin)
 signin_btn.place(x=35, y=270)
 signup_lbl = tk.Label(frame,text="New user? Create your account ",fg='black',bg='white',font=('Microsoft YaHei UI Light',9))
 signup_lbl.place(x=70, y=310)
 signup_btn = tk.Button(frame,cursor='hand2',width=4,border=0,text="here",fg='#3d85c6',bg='white',font=('Microsoft YaHei UI Light',9,'bold'))
 signup_btn.place(x=250, y=310)
-
-
 
 
 
