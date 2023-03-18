@@ -39,6 +39,10 @@ tk.Frame(frame,width=295, height=2,bg='black').place(x=25,y=237)
 # Sign in and sign up
 signin_btn = tk.Button(frame,width=39,pady=7,text='Sign in',bg='#6cc570',fg='white',border=0)
 signin_btn.place(x=35, y=270)
+signup_lbl = tk.Label(frame,text="New user? Create your account ",fg='black',bg='white',font=('Microsoft YaHei UI Light',9))
+signup_lbl.place(x=70, y=310)
+signup_btn = tk.Button(frame,cursor='hand2',width=4,border=0,text="here",fg='#3d85c6',bg='white',font=('Microsoft YaHei UI Light',9,'bold'))
+signup_btn.place(x=250, y=310)
 
 
 
