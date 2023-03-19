@@ -8,7 +8,7 @@ root.geometry('700x405')
 root.resizable(False, False)
 
 # Add image and frame
-bg = tk.PhotoImage(file="slide.png")
+bg = tk.PhotoImage(file="media\\slide.png")
 img = tk.Label(root, image=bg)
 img.place(x=-360, y=0)
 
@@ -19,7 +19,7 @@ frame.place(x=360)
 head = tk.Label(frame,text='ENSAH G-SCHOOL LOGIN',font=("Helvetica", 16, 'bold'),bg='white')
 head.place(x=68,y=45)
 
-logo = tk.PhotoImage(file="logo-ensah_50x50.png")
+logo = tk.PhotoImage(file="media\\logo-ensah_50x50.png")
 img_logo = tk.Label(frame, image=logo,bg='white')
 img_logo.place(x=8, y=30)
 

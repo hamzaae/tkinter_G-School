@@ -1,12 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
+import webbrowser
 
 # Initialize main window
 window = tk.Tk()
 window.title('G-School')
 window.geometry('900x550')
 window.resizable(False, False)
-
 
 # Initialize notebook
 style = ttk.Style(window)
@@ -37,14 +37,27 @@ notebook.pack()
 # Home tab
 # Students tab
 # HR tab
-# Settings tab
-# About tab
+## Settings tab
+
+
+## About tab
 with open('media\\about_text', 'r') as abt:
+    # open about text and read content then pack it to about tab
     about_text = abt.read()
     abt_lbl = tk.Label(about_tab, text=about_text,fg='black',bg='white',font=('Microsoft YaHei UI Light',11,'bold'),width=900,height=550)
     abt_lbl.pack()
 
+    # Define a callback function
+    def callback(url):
+        webbrowser.open_new_tab(url)
+
+    # Create a Label to display the link
+    link = tk.Label(about_tab, text="https://ensah.ma/", font=('Helveticabold', 15), fg="blue",bg='white', cursor="hand2")
+    link.place(x=320,y=520)
+    link.bind("<Button-1>", lambda e: callback("https://ensah.ma/"))
 
 
 
+
+# mainloop
 window.mainloop()
