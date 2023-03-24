@@ -16,14 +16,12 @@ style1 = ttk.Style()
 style1.configure('Custom.TFrame', background="white")
 notebook = ttk.Notebook(window, style='lefttab.TNotebook', width=900, height=550)
 
-
 # tabs config: creation, icons, add to notebook
 home_tab = ttk.Frame(notebook, style='Custom.TFrame')
 students_tab = ttk.Frame(notebook, style='Custom.TFrame')
 hr_tab = ttk.Frame(notebook, style='Custom.TFrame')
 settings_tab = ttk.Frame(notebook, style='Custom.TFrame')
 about_tab = ttk.Frame(notebook, style='Custom.TFrame')
-
 
 t1 = tk.PhotoImage(file='media\\home.png')
 t2 = tk.PhotoImage(file='media\\stdt.png')
@@ -39,9 +37,9 @@ notebook.add(about_tab, text='\n\n\n   ABOUT   \n\n\n', image=t5, compound='left
 
 notebook.pack()
 
-# Home tab
-# Students tab
-# HR tab
+## Home tab
+## Students tab
+## HR tab
 ## Settings tab
 
 
@@ -66,7 +64,7 @@ with open('media\\about_text', 'r') as abt:
     link.bind("<Button-1>", lambda e: callback("https://ensah.ma/"))
 
 ## Settings tab
-frame_user = tkinter.LabelFrame(settings_tab, text="User settings", font=('Helveticabold', 15),bg="white")
+frame_user = tkinter.LabelFrame(settings_tab, text="User settings", font=('Helveticabold', 15),bg="white",height=200)
 frame_user.pack(fill="both", expand=1)
 frame_general = tkinter.LabelFrame(settings_tab, text="General settings",font=('Helveticabold', 15),bg="white")
 frame_general.pack(fill="both", expand=1)
@@ -76,9 +74,10 @@ v = tkinter.StringVar(frame_general, "1")
 def set_light_mode():
     style1.configure('Custom.TFrame', background='white')
     frame_general.configure(bg='white',fg='black')
-    light_rb.configure(bg="white",fg="black")
-    dark_rb.configure(bg="white",fg="black")
+    light_rb.configure(bg="white",fg="black",selectcolor='white')
+    dark_rb.configure(bg="white",fg="black",selectcolor='white')
     language_lbl.configure(bg='white', fg='black')
+    mail_receive.configure(bg='white', fg='black',selectcolor='white')
     frame_user.configure(bg='white',fg='black')
     abt_lbl.configure(bg='white',fg='black')
     link.configure(bg='white',fg='blue')
@@ -86,23 +85,39 @@ def set_light_mode():
 def set_dark_mode():
     style1.configure('Custom.TFrame', background='#26242f')
     frame_general.configure(bg='#26242f',fg="white")
-    light_rb.configure(bg='#26242f',fg='white')
-    dark_rb.configure(bg='#26242f',fg='white')
+    light_rb.configure(bg='#26242f',fg='white',selectcolor='black')
+    dark_rb.configure(bg='#26242f',fg='white',selectcolor='black')
     language_lbl.configure(bg='#26242f',fg='white')
+    mail_receive.configure(bg='#26242f',fg='white',selectcolor='black')
     frame_user.configure(bg='#26242f', fg="white")
     abt_lbl.configure(bg='#26242f', fg="white")
     link.configure(bg='#26242f', fg="blue")
 
+# 1.General settings
 light_rb = tkinter.Radiobutton(frame_general, text=" Light mode ", variable=v,
                     value="1",font=('Microsoft YaHei UI Light', 11, 'bold'),bg='white', command=set_light_mode)
-light_rb.place(x=0,y=30)
+light_rb.place(x=15,y=30)
 dark_rb = tkinter.Radiobutton(frame_general, text=" Dark mode ", variable=v,
                     value="2",font=('Microsoft YaHei UI Light', 11, 'bold'),bg='white', command=set_dark_mode)
-dark_rb.place(x=0,y=70)
-language_lbl = tkinter.Label(frame_general, text="      Language ",
+dark_rb.place(x=15,y=70)
+language_lbl = tkinter.Label(frame_general, text="     Language ",
               font=('Microsoft YaHei UI Light', 11, 'bold'), bg="white")
-language_lbl.place(x=0, y=110)
+language_lbl.place(x=250, y=30)
+mail_receive = tkinter.Checkbutton(frame_general,text="I want to receive notifications on my email",
+              font=('Microsoft YaHei UI Light', 11, 'bold'), bg="white")
+mail_receive.place(x=250, y=70)
 
+n = tk.StringVar()
+lang_box = ttk.Combobox(frame_general, width=27, textvariable=n, state="readonly")
+lang_box['values'] = (' Arabic', ' English', ' French')
+
+lang_box.place(x=370,y=33)
+lang_box.current(1)
+
+# 2.User settings
+_lbl = tkinter.Label(frame_user, text="      Language ",
+              font=('Microsoft YaHei UI Light', 11, 'bold'), bg="white")
+_lbl.place(x=0, y=230)
 
 # mainloop
 window.mainloop()
