@@ -1,10 +1,13 @@
+import tkinter
 import tkinter as tk
+import webbrowser
+
 
 access = True
 # Create the window
 root = tk.Tk()
 root.title('G-School LOGIN')
-root.geometry('700x405')
+root.geometry('700x402')
 root.resizable(False, False)
 
 # Add image and frame
@@ -35,8 +38,18 @@ def on_leave(e):
         user.insert(0, 'Username')
 
 
+def validate_input(new_value):
+    if len(new_value) > 15:
+        return False
+    else:
+        return True
+
+
+vcmd = (root.register(validate_input), '%P')
+
 # Add inputs and ligne decorator
-user = tk.Entry(frame, width=25, fg='black', border=0, bg='white', font=('Microsoft YaHei UI Light', 18, 'bold'))
+user = tk.Entry(frame, width=25, fg='black', border=0, bg='white',
+                font=('Microsoft YaHei UI Light', 18, 'bold'), validate="key", validatecommand=vcmd)
 user.place(x=30, y=130)
 user.insert(0, 'Username')
 user.bind('<FocusIn>', on_enter)
@@ -54,7 +67,8 @@ def on_leave(e):
         pswrd.insert(0, 'Password')
 
 
-pswrd = tk.Entry(frame, width=25, fg='black', border=0, bg='white', font=('Microsoft YaHei UI Light', 18, 'bold'))
+pswrd = tk.Entry(frame, width=25, fg='black', border=0, bg='white', validate="key", validatecommand=vcmd,
+                 font=('Microsoft YaHei UI Light', 18, 'bold'),show='*')
 pswrd.place(x=30, y=200)
 pswrd.insert(0, 'Password')
 pswrd.bind('<FocusIn>', on_enter)
@@ -63,6 +77,17 @@ pswrd.bind('<FocusOut>', on_leave)
 tk.Frame(frame, width=295, height=2, bg='black').place(x=25, y=167)
 tk.Frame(frame, width=295, height=2, bg='black').place(x=25, y=237)
 
+
+def show_and_hide():
+    if pswrd['show'] == '*':
+        pswrd['show'] = ''
+    else:
+        pswrd['show'] = '*'
+
+
+checkBox_showPassword = tkinter.Button(frame, text="👁", bg='white',borderwidth=0,
+                                    font=('verdana', 14), command=show_and_hide)
+checkBox_showPassword.place(x=280,y=195)
 
 ### sign_in behavior
 def on_signin():
@@ -79,11 +104,21 @@ def on_signin():
 # Sign in and sign up buttons
 signin_btn = tk.Button(frame, width=39, pady=7, text='Sign in', bg='#6cc570', fg='white', border=0, command=on_signin)
 signin_btn.place(x=35, y=270)
-signup_lbl = tk.Label(frame, text="New user? Create your account ", fg='black', bg='white',
-                      font=('Microsoft YaHei UI Light', 9))
-signup_lbl.place(x=70, y=310)
-signup_btn = tk.Button(frame, cursor='hand2', width=4, border=0, text="here", fg='#3d85c6', bg='white',
-                       font=('Microsoft YaHei UI Light', 9, 'bold'))
-signup_btn.place(x=250, y=310)
+signin_face_btn = tk.Button(frame, width=39, pady=7, text='Face Sign in', bg='#5271ff', fg='white', border=0, command=on_signin)
+signin_face_btn.place(x=35, y=315)
+
+signup_lbl = tk.Label(frame, text="Visit our site to know more About! ", fg='black', bg='white',
+                      font=('Microsoft YaHei UI Light', 11))
+signup_lbl.place(x=65, y=350)
+
+# Define a callback function
+def callback(url):
+    webbrowser.open_new_tab(url)
+
+# Create a Label to display the link
+link = tk.Label(frame, text="https://ensah.ma/", font=('Helveticabold', 10), fg="blue",bg="white",
+                cursor="hand2")
+link.place(x=120, y=375)
+link.bind("<Button-1>", lambda e: callback("https://ensah.ma/"))
 
 root.mainloop()
