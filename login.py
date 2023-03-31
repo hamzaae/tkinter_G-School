@@ -1,7 +1,36 @@
 import tkinter
 import tkinter as tk
 import webbrowser
+import cv2
+from PIL import Image,ImageTk
+import util
 
+class App:
+    def __init__(self,window):
+        self.webcam_label = util.get_img_label(window)
+        self.webcam_label.place(x=0, width=365, height=405)
+        self.add_webcam(self.webcam_label)
+    def add_webcam(self, label):
+        if 'cap' not in self.__dict__:
+            self.cap = cv2.VideoCapture(1)
+
+        self._label = label
+        self.process_webcam()
+
+    def process_webcam(self):
+        ret, frame = self.cap.read()
+
+        self.most_recent_capture_arr = frame
+        img_ = cv2.cvtColor(self.most_recent_capture_arr, cv2.COLOR_BGR2RGB)
+        self.most_recent_capture_pil = Image.fromarray(img_)
+        imgtk = ImageTk.PhotoImage(image=self.most_recent_capture_pil)
+        self._label.imgtk = imgtk
+        self._label.configure(image=imgtk)
+
+        self._label.after(20, self.process_webcam)
+
+    def start(self,w):
+        w.mainloop()
 
 access = True
 # Create the window
@@ -100,12 +129,22 @@ def on_signin():
     else:
         pass
 
+def on_face_sign():
+    signin_face_btn.configure(text='say cheese')
+    app = App(root)
+    app.start(root)
+
+
 
 # Sign in and sign up buttons
 signin_btn = tk.Button(frame, width=39, pady=7, text='Sign in', bg='#6cc570', fg='white', border=0, command=on_signin)
 signin_btn.place(x=35, y=270)
-signin_face_btn = tk.Button(frame, width=39, pady=7, text='Face Sign in', bg='#5271ff', fg='white', border=0, command=on_signin)
+signin_face_btn = tk.Button(frame, width=39, pady=7, text='Face Sign in', bg='#5271ff', fg='white', border=0,command=on_face_sign)
 signin_face_btn.place(x=35, y=315)
+camera_label = tkinter.Label(root)
+camera_label.place(x=0)
+
+
 
 signup_lbl = tk.Label(frame, text="Visit our site to know more About! ", fg='black', bg='white',
                       font=('Microsoft YaHei UI Light', 11))
@@ -120,5 +159,7 @@ link = tk.Label(frame, text="https://ensah.ma/", font=('Helveticabold', 10), fg=
                 cursor="hand2")
 link.place(x=120, y=375)
 link.bind("<Button-1>", lambda e: callback("https://ensah.ma/"))
+
+
 
 root.mainloop()

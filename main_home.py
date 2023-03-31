@@ -9,7 +9,7 @@ import re
 # Initialize main window
 window = tk.Tk()
 window.title('G-School')
-window.geometry('900x550')
+window.geometry('1100x550')
 window.resizable(False, False)
 
 # Initialize notebook
@@ -17,7 +17,7 @@ style0 = ttk.Style(window)
 style0.configure('lefttab.TNotebook', tabposition='ws')
 style1 = ttk.Style()
 style1.configure('Custom.TFrame', background="white")
-notebook = ttk.Notebook(window, style='lefttab.TNotebook', width=900, height=550)
+notebook = ttk.Notebook(window, style='lefttab.TNotebook', width=1100, height=550)
 
 # tabs config: creation, icons, add to notebook
 home_tab = ttk.Frame(notebook, style='Custom.TFrame')
@@ -307,9 +307,9 @@ with open('media\\about_text', 'r') as abt:
 
 
     # Create a Label to display the link
-    link = tk.Label(about_tab, text="https://ensah.ma/", font=('Helveticabold', 15), fg="blue",bg="white",
+    link = tk.Label(about_tab, text="https://ensah.ma/", font=('Helveticabold', 12), fg="blue",bg="white",
                     cursor="hand2")
-    link.place(x=320, y=520)
+    link.place(x=320, y=524)
     link.bind("<Button-1>", lambda e: callback("https://ensah.ma/"))
 
 ## Settings tab
