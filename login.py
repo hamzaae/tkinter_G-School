@@ -1,11 +1,14 @@
 import tkinter
 import tkinter as tk
+import traceback
 import webbrowser
 import cv2
 from PIL import Image, ImageTk
 import camtest
 import mysql.connector
 import hashlib
+import home
+
 
 
 class Login:
@@ -128,8 +131,12 @@ class Login:
                          (username_input, password_input))
         if self.mycursor.fetchall():
             print("ok")
+            self.root.destroy()
+            main_home = home.Home()
+            main_home.start()
         else:
             print("ko")
+
 
     def on_face_signin(self):
         try:
@@ -137,8 +144,8 @@ class Login:
             app = camtest.App(self.root)
             app.start(self.root)
             self.cam_on = True
-        except cv2 as e:
-            print(e)
+        except Exception as e:
+            traceback.print_exc()
             print("already on")
 
     def callback(self, url):
