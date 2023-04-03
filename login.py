@@ -1,5 +1,6 @@
 import tkinter
 import tkinter as tk
+from tkinter import messagebox
 import traceback
 import webbrowser
 import cv2
@@ -8,7 +9,6 @@ import camtest
 import mysql.connector
 import hashlib
 import home
-
 
 
 class Login:
@@ -50,6 +50,10 @@ class Login:
         self.pswrd.insert(0, 'Password')
         self.pswrd.bind('<FocusIn>', self.on_enter_password)
         self.pswrd.bind('<FocusOut>', self.on_leave_password)
+        self.forgot_pswrd = tk.Button(self.frame,text="Forgot password?",bd=0, fg='black', bg='white',
+                        font=('Microsoft YaHei UI Light', 9), command=self.forgot_password)
+        self.forgot_pswrd.place(x=210, y=240)
+
         # 3-decorators
         self.fr1 = tk.Frame(self.frame, width=295, height=2, bg='black')
         self.fr1.place(x=25, y=167)
@@ -94,7 +98,8 @@ class Login:
         self.root.mainloop()
 
     def on_enter_user(self, e):
-        self.user.delete(0, 'end')
+        if self.user.get() == "Username":
+            self.user.delete(0, 'end')
 
     def on_leave_user(self, e):
         name = self.user.get()
@@ -102,7 +107,8 @@ class Login:
             self.user.insert(0, 'Username')
 
     def on_enter_password(self, e):
-        self.pswrd.delete(0, 'end')
+        if self.pswrd.get() == "Password":
+            self.pswrd.delete(0, 'end')
 
     def on_leave_password(self, e):
         name = self.pswrd.get()
@@ -128,15 +134,15 @@ class Login:
         password_input = hashlib.sha256(password_input).hexdigest()
         # checking
         self.mycursor.execute("SELECT * FROM users WHERE username = %s AND passwordd = %s",
-                         (username_input, password_input))
-        if self.mycursor.fetchall():
-            print("ok")
+                                  (username_input, password_input))
+        row = self.mycursor.fetchone()
+        if row == None:
+            messagebox.showerror('Error','Invalid Username or Password!')
+
+        else:
             self.root.destroy()
             main_home = home.Home()
             main_home.start()
-        else:
-            print("ko")
-
 
     def on_face_signin(self):
         try:
@@ -150,5 +156,32 @@ class Login:
 
     def callback(self, url):
         webbrowser.open_new_tab(url)
+
+    def forgot_password(self):
+        self.forg_pass_w = tk.Toplevel()
+        self.forg_pass_w.title('Forgot password')
+        self.forg_pass_w.geometry('300x150')
+        self.forg_pass_w.resizable(False, False)
+        tk.Label(self.forg_pass_w, text="Enter your email:", font=('Microsoft YaHei UI Light', 14, 'bold')).pack()
+        self.email_box = tk.Entry(self.forg_pass_w, width=35, fg='black',
+                        border=0, bg='white', validate="key", font=('Microsoft YaHei UI Light', 10, 'bold'))
+        self.email_box.pack()
+        submit_btn = tk.Button(self.forg_pass_w, text="Submit",command=self.reset_password_out)
+        submit_btn.pack()
+        self.answer = tk.Label(self.forg_pass_w)
+        self.answer.pack()
+
+        self.forg_pass_w.mainloop()
+
+    def reset_password_out(self):
+        email_get = self.email_box.get().strip()
+        self.mycursor.execute("SELECT * FROM users WHERE email = %s ",
+                              (email_get,))
+        row = self.mycursor.fetchone()
+        if row == None:
+            self.answer.configure(text='\nEmail doesnt exists!',fg='red')
+        else:
+            self.answer.configure(text='\nAn email will bes sent to \nyou containing your new password',fg='green')
+
 
 
