@@ -6,6 +6,8 @@ import webbrowser
 from tkinter import *
 import re
 from email.message import EmailMessage
+
+import face_login
 import login
 
 
@@ -247,6 +249,9 @@ class Home():
         self.current_user_table.heading("Last name", text="Last name")
         self.current_user_table.heading("Prev", text="Prev")
         self.current_user_table["show"] = 'headings'
+        self.add_img_btn = tkinter.Button(self.frame_user, width=20, pady=7, text='add face signin', bg='#3f8ad4', fg='white',
+                                      border=0,command=self.add_usr_img)
+        self.add_img_btn.place(x=600, y=100)
         # Set column width
         self.current_user_table.column("Cin", width=100)
         self.current_user_table.column("First name", width=100)
@@ -297,7 +302,8 @@ class Home():
         self.lang_box['values'] = (' Arabic', ' English', ' French')
         self.lang_box.place(x=330, y=33)
         self.lang_box.current(1)
-        self.signout_btn = tkinter.Button(self.frame_general, width=20, pady=7, text='Log out', bg='#db6e6e', fg='white', border=0)
+        self.signout_btn = tkinter.Button(self.frame_general, width=20, pady=7, text='Log out',
+                            bg='#db6e6e', fg='white', border=0,command=self.signout)
         self.signout_btn.place(x=600, y=75)
         self.hhh_btn = tkinter.Button(self.frame_general, width=20, pady=7, text='LOG', bg='#3f8ad4', fg='white', border=0)
         self.hhh_btn.place(x=600, y=28)
@@ -418,6 +424,26 @@ class Home():
         with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
             smtp.login(self.email_sender,self.email_password)
             smtp.sendmail(self.email_sender,email_user,em.as_string())
+
+    def add_usr_img(self):
+        self.register_new_user_window = tkinter.Toplevel(self.window)
+        self.register_new_user_window.geometry("600x520")
+        app = face_login.App(self.register_new_user_window)
+        self.submit_button_register_new_user_window = tkinter.Button(self.register_new_user_window,
+                    text='Submit',bg='red',width=20,
+                    command=lambda:app.accept_register_new_user(self.register_new_user_window))
+        self.submit_button_register_new_user_window.place(x=450, y=300)
+        self.ok_button_register_new_user_window = tkinter.Button(self.register_new_user_window,
+                    text='OK',bg='green',width=20,
+                    command=lambda:app.register_new_user(self.register_new_user_window,self.ok_button_register_new_user_window))
+        self.ok_button_register_new_user_window.place(x=450, y=200)
+        app = face_login.App(self.register_new_user_window)
+        app.start(self.register_new_user_window,450,520)
+
+    def signout(self):
+        self.window.destroy()
+        loginn = login.Login()
+        loginn.start()
 
     def start(self):
         self.window.mainloop()

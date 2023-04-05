@@ -8,7 +8,7 @@ import traceback
 import webbrowser
 import cv2
 from PIL import Image, ImageTk
-import camtest
+import face_login
 import mysql.connector
 import hashlib
 import random
@@ -157,14 +157,11 @@ class Login:
 
 
     def on_face_signin(self):
-        try:
-            self.signin_face_btn.configure(text='say cheese')
-            app = camtest.App(self.root)
-            app.start(self.root)
-            self.cam_on = True
-        except Exception as e:
-            traceback.print_exc()
-            print("already on")
+
+        app = face_login.App(self.root)
+        self.signin_face_btn.configure(text='Submit', command=lambda:app.login())
+        app.start(self.root,365,405)
+
 
     def callback(self, url):
         webbrowser.open_new_tab(url)
@@ -202,6 +199,7 @@ class Login:
             em.set_content(new_pswrd)
             self.mycursor.execute("UPDATE users SET passwordd = %s WHERE email = %s",
                                   (hashlib.sha256(new_pswrd.encode()).hexdigest(),email_get))
+            self.mydb.commit()
             context = ssl.create_default_context()
             with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
                 smtp.login(self.email_sender, self.email_password)
@@ -214,5 +212,4 @@ class Login:
         for _ in range(10):
             password += random.choice(chars)
         return password
-
 

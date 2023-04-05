@@ -3,7 +3,7 @@ import pickle
 
 import tkinter as tk
 from tkinter import messagebox
-#import face_recognition
+import face_recognition
 
 
 def get_button(window, text, color, command, fg='white'):
@@ -25,7 +25,7 @@ def get_button(window, text, color, command, fg='white'):
 
 def get_img_label(window):
     label = tk.Label(window)
-    label.grid(row=0, column=0)
+    #label.grid(row=0, column=0)
     return label
 
 
