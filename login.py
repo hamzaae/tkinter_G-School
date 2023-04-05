@@ -1,5 +1,8 @@
+import smtplib
+import ssl
 import tkinter
 import tkinter as tk
+from email.message import EmailMessage
 from tkinter import messagebox
 import traceback
 import webbrowser
@@ -8,10 +11,13 @@ from PIL import Image, ImageTk
 import camtest
 import mysql.connector
 import hashlib
+import random
+import string
 import home
 
 
 class Login:
+    current_user = {}
     def __init__(self):
         # Create the window
         self.root = tk.Tk()
@@ -93,6 +99,9 @@ class Login:
             database="g_school"
         )
         self.mycursor = self.mydb.cursor()
+        # Other
+        self.email_sender = 'tkinter.gschool@gmail.com'
+        self.email_password = 'vizjfzoeihmxchqu'
 
     def start(self):
         self.root.mainloop()
@@ -134,15 +143,18 @@ class Login:
         password_input = hashlib.sha256(password_input).hexdigest()
         # checking
         self.mycursor.execute("SELECT * FROM users WHERE username = %s AND passwordd = %s",
-                                  (username_input, password_input))
-        row = self.mycursor.fetchone()
-        if row == None:
+                              (username_input, password_input))
+        Login.current_user = self.mycursor.fetchone()
+
+
+        if Login.current_user == None:
             messagebox.showerror('Error','Invalid Username or Password!')
 
         else:
             self.root.destroy()
             main_home = home.Home()
             main_home.start()
+
 
     def on_face_signin(self):
         try:
@@ -182,6 +194,25 @@ class Login:
             self.answer.configure(text='\nEmail doesnt exists!',fg='red')
         else:
             self.answer.configure(text='\nAn email will bes sent to \nyou containing your new password',fg='green')
+            em = EmailMessage()
+            em['From'] = self.email_sender
+            em['To'] =email_get
+            em['Subject'] = "Reset your G-School password"
+            new_pswrd = Login.generate_pswrd()
+            em.set_content(new_pswrd)
+            self.mycursor.execute("UPDATE users SET passwordd = %s WHERE email = %s",
+                                  (hashlib.sha256(new_pswrd.encode()).hexdigest(),email_get))
+            context = ssl.create_default_context()
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+                smtp.login(self.email_sender, self.email_password)
+                smtp.sendmail(self.email_sender, email_get, em.as_string())
 
+    @staticmethod
+    def generate_pswrd():
+        chars = string.ascii_letters + string.digits + string.punctuation
+        password = ''
+        for _ in range(10):
+            password += random.choice(chars)
+        return password
 
 

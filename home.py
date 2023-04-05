@@ -1,14 +1,19 @@
+import smtplib
+import ssl
 import tkinter
-import tkinter as tk
 from tkinter import ttk
 import webbrowser
 from tkinter import *
 import re
+from email.message import EmailMessage
+import login
+
+
 
 class Home():
     def __init__(self):
         # Initialize main window
-        self.window = tk.Tk()
+        self.window = tkinter.Tk()
         self.window.title('G-School')
         self.window.geometry('900x550')
         self.window.resizable(False, False)
@@ -26,11 +31,11 @@ class Home():
         self.settings_tab = ttk.Frame(self.notebook, style='Custom.TFrame')
         self.about_tab = ttk.Frame(self.notebook, style='Custom.TFrame')
         ## 2-icons
-        self.t1 = tk.PhotoImage(file='media\\home.png')
-        self.t2 = tk.PhotoImage(file='media\\stdt.png')
-        self.t3 = tk.PhotoImage(file='media\\tchr.png')
-        self.t4 = tk.PhotoImage(file='media\\sett.png')
-        self.t5 = tk.PhotoImage(file='media\\hlp.png')
+        self.t1 = tkinter.PhotoImage(file='media\\home.png')
+        self.t2 = tkinter.PhotoImage(file='media\\stdt.png')
+        self.t3 = tkinter.PhotoImage(file='media\\tchr.png')
+        self.t4 = tkinter.PhotoImage(file='media\\sett.png')
+        self.t5 = tkinter.PhotoImage(file='media\\hlp.png')
         ## 3- adding and packing
         self.notebook.add(self.home_tab, text='\n\n\n   HOME    \n\n\n', image=self.t1, compound='left')
         self.notebook.add(self.students_tab, text='\n\n\nSTUDENTS\n\n\n', image=self.t2, compound='left')
@@ -285,16 +290,16 @@ class Home():
                         font=('Microsoft YaHei UI Light', 11, 'bold'), bg="white")
         self.language_lbl.place(x=210, y=30)
         self.mail_receive = tkinter.Checkbutton(self.frame_general, text="I want to receive notifications on my email",
-                        font=('Microsoft YaHei UI Light', 11, 'bold'), bg="white")
+                        font=('Microsoft YaHei UI Light', 11, 'bold'), bg="white",command=self.mail_receive)
         self.mail_receive.place(x=210, y=80)
-        self.n = tk.StringVar()
+        self.n = tkinter.StringVar()
         self.lang_box = ttk.Combobox(self.frame_general, width=27, textvariable=self.n, state="readonly")
         self.lang_box['values'] = (' Arabic', ' English', ' French')
         self.lang_box.place(x=330, y=33)
         self.lang_box.current(1)
-        self.signout_btn = tk.Button(self.frame_general, width=20, pady=7, text='Log out', bg='#db6e6e', fg='white', border=0)
+        self.signout_btn = tkinter.Button(self.frame_general, width=20, pady=7, text='Log out', bg='#db6e6e', fg='white', border=0)
         self.signout_btn.place(x=600, y=75)
-        self.hhh_btn = tk.Button(self.frame_general, width=20, pady=7, text='LOG', bg='#3f8ad4', fg='white', border=0)
+        self.hhh_btn = tkinter.Button(self.frame_general, width=20, pady=7, text='LOG', bg='#3f8ad4', fg='white', border=0)
         self.hhh_btn.place(x=600, y=28)
 
         ############# ABOUT Tab #############
@@ -302,15 +307,18 @@ class Home():
         with open('media\\about_text', 'r') as abt:
             # open about text and read content then pack it to about tab
             about_text = abt.read()
-            self.abt_lbl = tk.Label(self.about_tab, text=about_text, fg='black',
+            self.abt_lbl = tkinter.Label(self.about_tab, text=about_text, fg='black',
                                font=('Microsoft YaHei UI Light', 11, 'bold'), width=900, height=550, bg="white")
             self.abt_lbl.pack()
-        self.link = tk.Label(self.about_tab, text="https://ensah.ma/",
+        self.link = tkinter.Label(self.about_tab, text="https://ensah.ma/",
                     font=('Helveticabold', 12), fg="blue", bg="white", cursor="hand2")
-        self.link.place(x=320, y=524)
+        self.link.place(x=330, y=524)
         self.link.bind("<Button-1>", lambda e: self.callback("https://ensah.ma/"))
 
-        ###########
+        ########### Other
+        self.email_sender = 'tkinter.gschool@gmail.com'
+        self.email_password = 'tkinterPassword123'
+
 
     def validate_names(self, new_value):
         name_pattern = r'^[a-zA-Z\-\s]+$'
@@ -376,7 +384,7 @@ class Home():
         self.mail_receive.configure(bg='#26242f', fg='white', selectcolor='black')
         self.frame_user.configure(bg='#26242f', fg="white")
         self.abt_lbl.configure(bg='#26242f', fg="white")
-        self.link.configure(bg='#26242f', fg="blue")
+        self.link.configure(bg='#26242f', fg="#c1c6e8")
         self.current_user_label.configure(bg="#26242f", fg="red")
         self.other_users_label.configure(bg="#26242f", fg="green")
         self.stuff_button_frame.configure(bg="#26242f")
@@ -399,6 +407,17 @@ class Home():
         self.phone_label.configure(bg="#26242f", fg="white")
         self.address_label.configure(bg="#26242f", fg="white")
 
+    def mail_receive(self,Subject, To, Message):
+        email_user = login.Login.current_user[4]
+        em = EmailMessage()
+        em['From'] = self.email_sender
+        em['To'] = To
+        em['Subject'] = Subject
+        em.set_content(Message)
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+            smtp.login(self.email_sender,self.email_password)
+            smtp.sendmail(self.email_sender,email_user,em.as_string())
+
     def start(self):
         self.window.mainloop()
-
