@@ -1,3 +1,4 @@
+import os
 import smtplib
 import ssl
 import tkinter
@@ -10,6 +11,7 @@ import datetime
 import subprocess
 import face_login
 import login
+import home_dashboard
 
 
 
@@ -315,8 +317,10 @@ class Home:
         self.signout_btn = tkinter.Button(self.frame_general, width=20, pady=7, text='Log out',
                             bg='#db6e6e', fg='white', border=0,command=self.signout)
         self.signout_btn.place(x=600, y=75)
-        self.hhh_btn = tkinter.Button(self.frame_general, width=20, pady=7, text='LOG', bg='#3f8ad4', fg='white', border=0)
-        self.hhh_btn.place(x=600, y=28)
+        self.log_btn = tkinter.Button(self.frame_general, width=20, pady=7,
+                        text='LOG', bg='#3f8ad4', fg='white', border=0,
+                        command=self.start_logfile)
+        self.log_btn.place(x=600, y=28)
 
         ############# ABOUT Tab #############
         # Create a Label to display the link
@@ -437,9 +441,7 @@ class Home:
     def add_usr_img(self):
         self.register_new_user_window = tkinter.Toplevel(self.window)
         self.register_new_user_window.geometry("600x520")
-        #self.register_new_user_window.protocol("WM_DELETE_WINDOW", self.on_exit(app,self.ok_button_register_new_user_window))
         self.register_new_user_window.protocol("WM_DELETE_WINDOW", self.disable_event)
-        #app = face_login.App_face()
         self.ok_button_register_new_user_window = tkinter.Button(self.register_new_user_window,
                     text='OK',bg='green',width=20,
                     command=lambda:login.Login.app.register_new_user(self.register_new_user_window,self.ok_button_register_new_user_window))
@@ -448,7 +450,6 @@ class Home:
                     text='CLOSE',bg='red',width=20,
                     command=self.close_event)
         self.close_button_register_new_user_window.place(x=450, y=100)
-        #self.app = face_login.App_face()
         login.Login.app.start(self.register_new_user_window,450,520)
 
     def disable_event(self):
@@ -469,5 +470,8 @@ class Home:
 
     def current_user_fill(self):
         pass
+
+    def start_logfile(self):
+        os.startfile("log.txt")
     def start(self):
         self.window.mainloop()
