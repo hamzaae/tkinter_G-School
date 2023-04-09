@@ -1,3 +1,4 @@
+import tkinter
 import os.path
 import datetime
 import subprocess
@@ -8,8 +9,6 @@ import login
 import util
 import home
 from tkinter import messagebox
-
-#from test import test
 
 
 class App_face:
@@ -50,7 +49,7 @@ class App_face:
         output = str(subprocess.check_output(['face_recognition',self.db_dir,unkown_img]))
         name = output.split(',')[1].replace('\\r\\n\'','')
 
-        if name in ['unkonwn_person','no_persons_found']:
+        if name in ['unknown_person','no_persons_found']:
             util.msg_box('Ups...','Unknown user')
         else:
             self.end_video()
@@ -72,14 +71,25 @@ class App_face:
 
 
     def end_video(self):
-        self.cap.release()
-        cv2.destroyAllWindows()
-        self._label.destroy()
+        if 'cap' in self.__dict__:
+            self.cap.release()
+            cv2.destroyAllWindows()
+            self._label.destroy()
+            del self.__dict__["cap"]
 
     def register_new_user(self,window,btn):
+        self.submit_button_register_new_user_window = tkinter.Button(window,
+                        text='Submit', bg='blue', width=20,
+                        command=lambda: self.accept_register_new_user(window))
+        self.submit_button_register_new_user_window.place(x=450, y=300)
+        if 'cap' not in self.__dict__:
+            self.cap = cv2.VideoCapture(1)
+        ret, frame = self.cap.read()
+        self.most_recent_capture_arr = frame
+        img_ = cv2.cvtColor(self.most_recent_capture_arr, cv2.COLOR_BGR2RGB)
+        self.most_recent_capture_pil = Image.fromarray(img_)
         self.capture_label = util.get_img_label(window)
         self.capture_label.place(x=0, y=0, width=450, height=520)
-
         self.add_img_to_label(self.capture_label)
         btn.configure(text="Try again")
 
@@ -103,5 +113,6 @@ class App_face:
         cv2.imwrite(os.path.join(self.db_dir,f'{name}.jpg'),self.register_new_user_capture)
 
         util.msg_box('Success!', 'User was registered successfully !')
+        self.end_video()
         window.destroy()
 

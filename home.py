@@ -439,24 +439,23 @@ class Home:
         self.register_new_user_window.geometry("600x520")
         #self.register_new_user_window.protocol("WM_DELETE_WINDOW", self.on_exit(app,self.ok_button_register_new_user_window))
         self.register_new_user_window.protocol("WM_DELETE_WINDOW", self.disable_event)
-        app = face_login.App_face()
-        self.submit_button_register_new_user_window = tkinter.Button(self.register_new_user_window,
-                    text='Submit',bg='red',width=20,
-                    command=lambda:app.accept_register_new_user(self.register_new_user_window))
-        self.submit_button_register_new_user_window.place(x=450, y=300)
+        #app = face_login.App_face()
         self.ok_button_register_new_user_window = tkinter.Button(self.register_new_user_window,
                     text='OK',bg='green',width=20,
-                    command=lambda:app.register_new_user(self.register_new_user_window,self.ok_button_register_new_user_window))
+                    command=lambda:login.Login.app.register_new_user(self.register_new_user_window,self.ok_button_register_new_user_window))
         self.ok_button_register_new_user_window.place(x=450, y=200)
         self.close_button_register_new_user_window = tkinter.Button(self.register_new_user_window,
-                    text='CLOSE',bg='green',width=20,
-                    )
+                    text='CLOSE',bg='red',width=20,
+                    command=self.close_event)
         self.close_button_register_new_user_window.place(x=450, y=100)
-        app = face_login.App_face()
-        app.start(self.register_new_user_window,450,520)
+        #self.app = face_login.App_face()
+        login.Login.app.start(self.register_new_user_window,450,520)
 
     def disable_event(self):
         pass
+    def close_event(self):
+        self.register_new_user_window.destroy()
+        login.Login.app.end_video()
 
 
     def signout(self):

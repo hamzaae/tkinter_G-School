@@ -44,7 +44,7 @@ class Login:
                         font=('Microsoft YaHei UI Light', 18, 'bold'),
                         validate="key", validatecommand=self.vcmd)
         self.user.place(x=30, y=130)
-        self.user.insert(0, 'Username')
+        self.user.insert(0, 'admin')
         self.user.bind('<FocusIn>', self.on_enter_user)
         self.user.bind('<FocusOut>', self.on_leave_user)
         # 2-password
@@ -53,7 +53,7 @@ class Login:
                         validatecommand=self.vcmd,
                         font=('Microsoft YaHei UI Light', 18, 'bold'), show='*')
         self.pswrd.place(x=30, y=200)
-        self.pswrd.insert(0, 'Password')
+        self.pswrd.insert(0, 'password123')
         self.pswrd.bind('<FocusIn>', self.on_enter_password)
         self.pswrd.bind('<FocusOut>', self.on_leave_password)
         self.forgot_pswrd = tk.Button(self.frame,text="Forgot password?",bd=0, fg='black', bg='white',
@@ -151,6 +151,7 @@ class Login:
             messagebox.showerror('Error', 'Invalid Username or Password!')
 
         else:
+            Login.app.end_video()
             with open(Login.log_path, 'a') as f:
                 f.write('{}{}{}\n'.format(Login.current_user[1], " logged in at ", datetime.datetime.now()))
                 f.close()
