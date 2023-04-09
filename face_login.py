@@ -1,28 +1,23 @@
 import os.path
 import datetime
-import pickle
 import subprocess
-
-import tkinter as tk
 import cv2
 import mysql.connector
 from PIL import Image, ImageTk
-import face_recognition
-
 import login
 import util
 import home
+from tkinter import messagebox
 
 #from test import test
 
 
-class App:
-    def __init__(self,window):
-        # DB connection and logfile
+class App_face:
+    def __init__(self):
+        # DB connection
         self.db_dir = './db'
         if not os.path.exists(self.db_dir):
             os.mkdir(self.db_dir)
-        self.log_path = './log.txt'
         self.mydb = mysql.connector.connect(
             host="localhost",
             user="root",
@@ -41,16 +36,13 @@ class App:
 
     def process_webcam(self):
         ret, frame = self.cap.read()
-
         self.most_recent_capture_arr = frame
         img_ = cv2.cvtColor(self.most_recent_capture_arr, cv2.COLOR_BGR2RGB)
         self.most_recent_capture_pil = Image.fromarray(img_)
         imgtk = ImageTk.PhotoImage(image=self.most_recent_capture_pil)
         self._label.imgtk = imgtk
         self._label.configure(image=imgtk)
-
         self._label.after(20, self.process_webcam)
-
 
     def login(self):
         unkown_img= './tmp.jpg'
@@ -61,25 +53,35 @@ class App:
         if name in ['unkonwn_person','no_persons_found']:
             util.msg_box('Ups...','Unknown user')
         else:
+            self.end_video()
             util.msg_box('welcome',f'hello {name}')
             self.mycursor.execute("SELECT * FROM users WHERE username = %s",
                                   (name,))
             login.Login.current_user = self.mycursor.fetchone()
-            self.root.destroy()
-            main_home = home.Home()
-            main_home.start()
-
+            if login.Login.current_user == None:
+                messagebox.showerror('Error', 'Invalid Username or Password!')
+            else:
+                with open(login.Login.log_path, 'a') as f:
+                    f.write('{}{}{}\n'.format(login.Login.current_user[1], " logged in using face signin at ",
+                                              datetime.datetime.now()))
+                    f.close()
+                login.Login.root.destroy()
+                main_home = home.Home()
+                main_home.start()
         os.remove(unkown_img)
 
 
-    def register_new_user(self,window,btn):
+    def end_video(self):
+        self.cap.release()
+        cv2.destroyAllWindows()
+        self._label.destroy()
 
+    def register_new_user(self,window,btn):
         self.capture_label = util.get_img_label(window)
         self.capture_label.place(x=0, y=0, width=450, height=520)
 
         self.add_img_to_label(self.capture_label)
         btn.configure(text="Try again")
-
 
     def add_img_to_label(self, label):
         imgtk = ImageTk.PhotoImage(image=self.most_recent_capture_pil)
@@ -88,7 +90,7 @@ class App:
 
         self.register_new_user_capture = self.most_recent_capture_arr.copy()
 
-    def start(self,window,x,y):
+    def start(self, window, x, y):
         self.webcam_label = util.get_img_label(window)
         self.webcam_label.place(x=0, width=x, height=y)
 
@@ -102,5 +104,4 @@ class App:
 
         util.msg_box('Success!', 'User was registered successfully !')
         window.destroy()
-
 

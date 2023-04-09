@@ -6,13 +6,14 @@ import webbrowser
 from tkinter import *
 import re
 from email.message import EmailMessage
-
+import datetime
+import subprocess
 import face_login
 import login
 
 
 
-class Home():
+class Home:
     def __init__(self):
         # Initialize main window
         self.window = tkinter.Tk()
@@ -243,21 +244,30 @@ class Home():
         self.table_frame1 = Frame(self.frame_user, bg="#101433")
         self.table_frame1.place(x=1, y=30, width=790, height=50)
         self.current_user_table = ttk.Treeview(self.table_frame1,
-                            columns=("Cin", "First name", "Last name", "Prev"))
-        self.current_user_table.heading("Cin", text="Cin")
+                columns=("User Name", "First name", "Last name", "Email","Phone","Identity"))
+        self.current_user_table.heading("User Name", text="User Name")
         self.current_user_table.heading("First name", text="First name")
         self.current_user_table.heading("Last name", text="Last name")
-        self.current_user_table.heading("Prev", text="Prev")
+        self.current_user_table.heading("Email", text="Email")
+        self.current_user_table.heading("Phone", text="Phone")
+        self.current_user_table.heading("Identity", text="Identity")
         self.current_user_table["show"] = 'headings'
         self.add_img_btn = tkinter.Button(self.frame_user, width=20, pady=7, text='add face signin', bg='#3f8ad4', fg='white',
                                       border=0,command=self.add_usr_img)
         self.add_img_btn.place(x=600, y=100)
         # Set column width
-        self.current_user_table.column("Cin", width=100)
-        self.current_user_table.column("First name", width=100)
-        self.current_user_table.column("Last name", width=100)
-        self.current_user_table.column("Prev", width=150)
+        self.current_user_table.column("User Name", width=70)
+        self.current_user_table.column("First name", width=70)
+        self.current_user_table.column("Last name", width=70)
+        self.current_user_table.column("Email", width=90)
+        self.current_user_table.column("Phone", width=60)
+        self.current_user_table.column("Identity", width=80)
         self.current_user_table.pack(fill=BOTH, expand=1)  # To show the table
+        # fill table -->
+        self.user_info = (login.Login.current_user[1],login.Login.current_user[1],
+                          login.Login.current_user[1],login.Login.current_user[4],
+                          login.Login.current_user[5],login.Login.current_user[3])
+        self.current_user_table.insert('','end',values=self.user_info)
         # ****** Other users table
         self.other_users_label = tkinter.Label(self.frame_user, text="Other users",
                             font=('Helveticabold', 13, "bold"), bg="white", fg="red")
@@ -324,7 +334,6 @@ class Home():
         ########### Other
         self.email_sender = 'tkinter.gschool@gmail.com'
         self.email_password = 'tkinterPassword123'
-
 
     def validate_names(self, new_value):
         name_pattern = r'^[a-zA-Z\-\s]+$'
@@ -428,7 +437,9 @@ class Home():
     def add_usr_img(self):
         self.register_new_user_window = tkinter.Toplevel(self.window)
         self.register_new_user_window.geometry("600x520")
-        app = face_login.App(self.register_new_user_window)
+        #self.register_new_user_window.protocol("WM_DELETE_WINDOW", self.on_exit(app,self.ok_button_register_new_user_window))
+        self.register_new_user_window.protocol("WM_DELETE_WINDOW", self.disable_event)
+        app = face_login.App_face()
         self.submit_button_register_new_user_window = tkinter.Button(self.register_new_user_window,
                     text='Submit',bg='red',width=20,
                     command=lambda:app.accept_register_new_user(self.register_new_user_window))
@@ -437,13 +448,27 @@ class Home():
                     text='OK',bg='green',width=20,
                     command=lambda:app.register_new_user(self.register_new_user_window,self.ok_button_register_new_user_window))
         self.ok_button_register_new_user_window.place(x=450, y=200)
-        app = face_login.App(self.register_new_user_window)
+        self.close_button_register_new_user_window = tkinter.Button(self.register_new_user_window,
+                    text='CLOSE',bg='green',width=20,
+                    )
+        self.close_button_register_new_user_window.place(x=450, y=100)
+        app = face_login.App_face()
         app.start(self.register_new_user_window,450,520)
+
+    def disable_event(self):
+        pass
+
 
     def signout(self):
         self.window.destroy()
-        loginn = login.Login()
-        loginn.start()
+        with open(login.Login.log_path, 'a') as f:
+            f.write('{}{}{}\n'.format(login.Login.current_user[1], " logged out at ", datetime.datetime.now()))
+            f.close()
+        login.Login.current_user = None
+        subprocess.call(['python', 'G-School.py'])
+        #login.Login().start()
 
+    def current_user_fill(self):
+        pass
     def start(self):
         self.window.mainloop()

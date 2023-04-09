@@ -2,12 +2,10 @@ import smtplib
 import ssl
 import tkinter
 import tkinter as tk
+import datetime
 from email.message import EmailMessage
 from tkinter import messagebox
-import traceback
 import webbrowser
-import cv2
-from PIL import Image, ImageTk
 import face_login
 import mysql.connector
 import hashlib
@@ -17,18 +15,20 @@ import home
 
 
 class Login:
+    log_path = './log.txt'
     current_user = {}
+    app = face_login.App_face()
+    root = tk.Tk()
     def __init__(self):
         # Create the window
-        self.root = tk.Tk()
-        self.root.title('G-School LOGIN')
-        self.root.geometry('700x402')
-        self.root.resizable(False, False)
+        Login.root.title('G-School LOGIN')
+        Login.root.geometry('700x402')
+        Login.root.resizable(False, False)
         # Add image and frame
         self.bg = tk.PhotoImage(file="media\\slide.png")
-        self.img = tk.Label(self.root, image=self.bg)
+        self.img = tk.Label(Login.root, image=self.bg)
         self.img.place(x=-360, y=0)
-        self.frame = tk.Frame(self.root, width=340, height=405, bg='white')
+        self.frame = tk.Frame(Login.root, width=340, height=405, bg='white')
         self.frame.place(x=360)
         # Show logo and heading
         self.head = tk.Label(self.frame, text='ENSAH G-SCHOOL LOGIN'
@@ -39,7 +39,7 @@ class Login:
         self.img_logo.place(x=8, y=30)
         # Add inputs and lign decorator and validating commands
         # 1-user
-        self.vcmd = (self.root.register(self.validate_input), '%P')
+        self.vcmd = (Login.root.register(self.validate_input), '%P')
         self.user = tk.Entry(self.frame, width=25, fg='black', border=0, bg='white',
                         font=('Microsoft YaHei UI Light', 18, 'bold'),
                         validate="key", validatecommand=self.vcmd)
@@ -78,8 +78,10 @@ class Login:
                         text='Face Sign in', bg='#5271ff', fg='white', border=0,
                         command=self.on_face_signin)
         self.signin_face_btn.place(x=35, y=315)
+        self.end_video = tkinter.Button(self.frame, width=18, pady=7,
+                                        text='End camera', bg='#fc4e63', fg='white', border=0)
         # camera
-        self.camera_label = tkinter.Label(self.root)
+        self.camera_label = tkinter.Label(Login.root)
         self.camera_label.place(x=0)
         # about
         self.abt_lbl = tk.Label(self.frame, text="Visit our site to know more About! ",
@@ -104,7 +106,7 @@ class Login:
         self.email_password = 'vizjfzoeihmxchqu'
 
     def start(self):
-        self.root.mainloop()
+        Login.root.mainloop()
 
     def on_enter_user(self, e):
         if self.user.get() == "Username":
@@ -145,22 +147,33 @@ class Login:
         self.mycursor.execute("SELECT * FROM users WHERE username = %s AND passwordd = %s",
                               (username_input, password_input))
         Login.current_user = self.mycursor.fetchone()
-
-
         if Login.current_user == None:
-            messagebox.showerror('Error','Invalid Username or Password!')
+            messagebox.showerror('Error', 'Invalid Username or Password!')
 
         else:
-            self.root.destroy()
+            with open(Login.log_path, 'a') as f:
+                f.write('{}{}{}\n'.format(Login.current_user[1], " logged in at ", datetime.datetime.now()))
+                f.close()
+            Login.root.destroy()
             main_home = home.Home()
             main_home.start()
 
-
     def on_face_signin(self):
+        self.signin_face_btn.configure(text='Submit', command=lambda:Login.app.login(), width=18)
+        self.end_video = tkinter.Button(self.frame, width=18, pady=7,
+                                        text='End camera', bg='#fc4e63', fg='white', border=0)
+        self.end_video.configure(command=self.end_video_cmd)
+        self.end_video.place(x=175, y=315)
+        Login.app.start(Login.root, 365, 405)
 
-        app = face_login.App(self.root)
-        self.signin_face_btn.configure(text='Submit', command=lambda:app.login())
-        app.start(self.root,365,405)
+
+    def end_video_cmd(self):
+        self.end_video.destroy()
+        self.signin_face_btn.configure(width=39, pady=7,
+                        text='Face Sign in', bg='#5271ff', fg='white', border=0,
+                        command=self.on_face_signin)
+        self.signin_face_btn.place(x=35, y=315)
+        Login.app.end_video()
 
 
     def callback(self, url):

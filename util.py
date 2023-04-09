@@ -1,9 +1,5 @@
-import os
-import pickle
-
 import tkinter as tk
 from tkinter import messagebox
-import face_recognition
 
 
 def get_button(window, text, color, command, fg='white'):
