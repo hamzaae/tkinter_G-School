@@ -9,10 +9,8 @@ import re
 from email.message import EmailMessage
 import datetime
 import subprocess
-import face_login
 import login
 import home_dashboard
-
 
 
 class Home:
@@ -20,14 +18,14 @@ class Home:
         # Initialize main window
         self.window = tkinter.Tk()
         self.window.title('G-School')
-        self.window.geometry('900x550')
+        self.window.geometry('1020x550')
         self.window.resizable(False, False)
         # Initialize notebook
         self.style0 = ttk.Style(self.window)
         self.style0.configure('lefttab.TNotebook', tabposition='ws')
         self.style1 = ttk.Style()
         self.style1.configure('Custom.TFrame', background="white")
-        self.notebook = ttk.Notebook(self.window, style='lefttab.TNotebook', width=900, height=550)
+        self.notebook = ttk.Notebook(self.window, style='lefttab.TNotebook', width=1020, height=550)
         # tabs config: creation, icons, add to notebook
         ## 1-creation
         self.home_tab = ttk.Frame(self.notebook, style='Custom.TFrame')
@@ -49,7 +47,7 @@ class Home:
         self.notebook.add(self.about_tab, text='\n\n\n   ABOUT   \n\n\n', image=self.t5, compound='left')
         self.notebook.pack()
         ############# HOME Tab #############
-
+        self.home = home_dashboard.DashBoard(self.home_tab)
 
         ############# STUDENTS Tab #############
         #****** Info frame
@@ -425,6 +423,7 @@ class Home:
         self.gender_label.configure(bg="#26242f", fg="white")
         self.phone_label.configure(bg="#26242f", fg="white")
         self.address_label.configure(bg="#26242f", fg="white")
+
 
     def mail_receive(self,Subject, To, Message):
         email_user = login.Login.current_user[4]
