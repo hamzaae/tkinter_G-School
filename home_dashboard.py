@@ -10,6 +10,9 @@ from matplotlib.figure import Figure
 import login
 
 class DashBoard:
+    nbr_std = 0
+    nbr_stf = 0
+    nbr_usr = 0
     def __init__(self, window):
         # header
         '''frame'''
@@ -51,16 +54,17 @@ class DashBoard:
         self.users_lbl = tkinter.Label(window, text=" Number of users", font=('Franklin Gothic Medium', 15, 'bold'),
                             bg='white', image=self.t3, compound='left')
         self.users_lbl.place(x=680, y=125)
+        self.nbr_students = tkinter.Label(window, text=DashBoard.nbr_std, font=('Tunga', 18),
+                                          bg='white')
+        self.nbr_students.place(x=165, y=160)
+        self.nbr_stuffs = tkinter.Label(window, text=DashBoard.nbr_stf, font=('Tunga', 18),
+                                        bg='white')
+        self.nbr_stuffs.place(x=495, y=160)
+        self.nbr_users = tkinter.Label(window, text=DashBoard.nbr_usr, font=('Tunga', 18),
+                                       bg='white')
+        self.nbr_users.place(x=795, y=160)
 
-        self.nbr_students = tkinter.Label(window, text='0', font=('Tunga', 18),
-                            bg='white')
-        self.nbr_students.place(x=165,y=160)
-        self.nbr_stuffs = tkinter.Label(window, text='0', font=('Tunga', 18),
-                            bg='white')
-        self.nbr_stuffs.place(x=495,y=160)
-        self.nbr_users = tkinter.Label(window, text='0', font=('Tunga', 18),
-                            bg='white')
-        self.nbr_users.place(x=795,y=160)
+
         '''graphs'''
         self.plot(window)
 
@@ -93,6 +97,10 @@ class DashBoard:
         canvas.get_tk_widget().place(x=100, y=300)
         canvas.draw()
 
+    def update_dashboard(self):
+        self.nbr_students.configure(text=DashBoard.nbr_std)
+        self.nbr_stuffs.configure(text=DashBoard.nbr_stf)
+        self.nbr_users.configure(text=DashBoard.nbr_usr)
 
 
 

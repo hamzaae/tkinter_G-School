@@ -12,6 +12,7 @@ import hashlib
 import random
 import string
 import home
+import home_dashboard
 
 
 class Login:
@@ -101,6 +102,12 @@ class Login:
             database="g_school"
         )
         self.mycursor = self.mydb.cursor()
+        self.mycursor.execute("SELECT COUNT(*) FROM users")
+        home_dashboard.DashBoard.nbr_usr = self.mycursor.fetchone()[0]
+        self.mycursor.execute("SELECT COUNT(*) FROM student_data")
+        home_dashboard.DashBoard.nbr_std = self.mycursor.fetchone()[0]
+        self.mycursor.execute("SELECT COUNT(*) FROM stuff_data")
+        home_dashboard.DashBoard.nbr_stf = self.mycursor.fetchone()[0]
         # Other
         self.email_sender = 'tkinter.gschool@gmail.com'
         self.email_password = 'vizjfzoeihmxchqu'
