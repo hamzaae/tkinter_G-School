@@ -3,6 +3,8 @@ import smtplib
 import ssl
 import tkinter
 from tkinter import ttk
+from tkinter.filedialog import askopenfile
+from PIL import Image as pimg, ImageTk
 import webbrowser
 from tkinter import *
 import re
@@ -61,6 +63,7 @@ class Home:
         self.t3 = tkinter.PhotoImage(file='media\\tchr.png')
         self.t4 = tkinter.PhotoImage(file='media\\sett.png')
         self.t5 = tkinter.PhotoImage(file='media\\hlp.png')
+        self.stf_img = tkinter.PhotoImage(file='media\\upload_img.png')
         ## 3- adding and packing
         self.notebook.add(self.home_tab, text='\n\n\n   HOME    \n\n\n', image=self.t1, compound='left')
         self.notebook.add(self.students_tab, text='\n\n\nSTUDENTS\n\n\n', image=self.t2, compound='left')
@@ -73,6 +76,17 @@ class Home:
         self.home = home_dashboard.DashBoard(self.home_tab)
 
         ############# STUDENTS Tab #############
+        # TODO : import and export csv
+        # student image
+        self.img_student = (pimg.open("db\\admin.jpg")).resize((300, 205), pimg.ANTIALIAS)
+        self.img_student = ImageTk.PhotoImage(self.img_student)
+        self.img_fr_student= tkinter.Frame(self.students_tab)
+        self.img_fr_student.place(x=780, y=23, width=110, height=140)
+        self.img_lbl_student = tkinter.Label(self.img_fr_student, image=self.img_student)
+        self.img_lbl_student.pack()
+        self.img_btn_student = tkinter.Button(self.students_tab, text='  Upload image ',
+                                image=self.stf_img, compound='left', bg='#689df2', command=self.upload_student_img)
+        self.img_btn_student.place(x=780, y=172)
         #****** Info frame
         self.students_info_frame = tkinter.LabelFrame(self.students_tab, text="Student information",
                                 font=('Helveticabold', 15), bg="white", fg="crimson", height=200)
@@ -101,7 +115,7 @@ class Home:
         self.email_label_entry.grid(row=1, column=4, padx=10, pady=10)
         ## Gender
         self.gender_label = tkinter.Label(self.students_info_frame, text="Gender", bg="white")
-        self.gender_combobox = ttk.Combobox(self.students_info_frame, values=["Man", "Just man"], state="readonly",textvariable=self.gender)
+        self.gender_combobox = ttk.Combobox(self.students_info_frame, values=["Man", "Woman"], state="readonly",textvariable=self.gender)
         self.gender_label.grid(row=3, column=1, padx=10)
         self.gender_combobox.grid(row=4, column=1, padx=10, pady=30)
         ## Phone
@@ -167,9 +181,19 @@ class Home:
 
 
         ############# HR Tab #############
+        # staff image
+        self.img_staff = (pimg.open("db\\admin.jpg")).resize((300, 205), pimg.ANTIALIAS)
+        self.img_staff = ImageTk.PhotoImage(self.img_staff)
+        self.img_fr_staff = tkinter.Frame(self.hr_tab)
+        self.img_fr_staff.place(x=780, y=23, width=110, height=140)
+        self.img_lbl_staff = tkinter.Label(self.img_fr_staff, image=self.img_staff)
+        self.img_lbl_staff.pack()
+        self.img_btn_staff = tkinter.Button(self.hr_tab, text='  Upload image ',
+                                image=self.stf_img, compound='left', bg='#689df2', command=self.upload_stuff_img)
+        self.img_btn_staff.place(x=780, y=172)
         #****** Info frame
         self.stuff_info_frame = tkinter.LabelFrame(self.hr_tab, text="Stuff information", font=('Helveticabold', 15),
-                            bg="white", fg="green", height=200)
+                            bg="white", fg="green", height=200, width=1000)
         self.stuff_info_frame.grid(row=0, column=0, padx=10, pady=10)
         ## Cne
         self.stuff_cne_label = tkinter.Label(self.stuff_info_frame, text="CNI", width=32, bg="white")
@@ -194,7 +218,7 @@ class Home:
         self.stuff_email_label_entry.grid(row=1, column=4, padx=10, pady=10)
         ## Gender combobox
         self.stuff_gender_label = tkinter.Label(self.stuff_info_frame, text="Gender", bg="white")
-        self.stuff_gender_combobox = ttk.Combobox(self.stuff_info_frame, values=["Man", "Just man"], state="readonly",textvariable=self.stuff_gender,)
+        self.stuff_gender_combobox = ttk.Combobox(self.stuff_info_frame, values=["Man", "Woman"], state="readonly",textvariable=self.stuff_gender,)
         self.stuff_gender_label.grid(row=3, column=1, padx=10)
         self.stuff_gender_combobox.grid(row=4, column=1, padx=10, pady=30)
         ## Phone
@@ -210,7 +234,7 @@ class Home:
         self.stuff_address_label_entry.grid(row=4, column=2, columnspan=10, rowspan=10, padx=10)
         #****** Buttons frame
         self.stuff_button_frame = Frame(self.hr_tab, bg="white")
-        self.stuff_button_frame.place(x=40, y=200, height=50, width=680)
+        self.stuff_button_frame.place(x=40, y=200, height=50, width=980)
         ## Update Button
         self.stuff_button = tkinter.Button(self.stuff_button_frame, text="Update", fg="#001433", bg="green", width=20,command=self.update_stuff)
         self.stuff_button.grid(row=0, column=0, padx=10, pady=10)
@@ -223,6 +247,8 @@ class Home:
         ## Clear Button
         self.stuff_button = tkinter.Button(self.stuff_button_frame, text="Clear", fg="#001433", bg="green", width=20,command=self.clear_stuff)
         self.stuff_button.grid(row=0, column=3, padx=10, pady=10)
+        self.import_csv_button = tkinter.Button(self.stuff_button_frame, text="Import from CSV", fg="#001433", bg="green", width=20,command=self.clear_stuff)
+        self.import_csv_button.grid(row=0, column=4, padx=10, pady=10)
         #****** Stuff table
         self.stuff_table_frame = Frame(self.hr_tab, bg="green")
         self.stuff_table_frame.place(x=10, y=250, height=280, width=750)
@@ -281,9 +307,26 @@ class Home:
         self.current_user_table.heading("Phone", text="Phone")
         self.current_user_table.heading("Identity", text="Identity")
         self.current_user_table["show"] = 'headings'
+        # user image
+        self.img = (pimg.open("db\\admin.jpg")).resize((300, 205), pimg.ANTIALIAS)
+        self.curr_img = ImageTk.PhotoImage(self.img)
+        self.curr_img_fr = tkinter.Frame(self.frame_user)
+        self.curr_img_fr.place(x=815, y=1, width=90, height=100)
+        self.curr_img_lbl = tkinter.Label(self.curr_img_fr, image=self.curr_img)
+        self.curr_img_lbl.pack()
+        # user buttons
         self.add_img_btn = tkinter.Button(self.frame_user, width=20, pady=7, text='add face signin', bg='#3f8ad4', fg='white',
                                       border=0,command=self.add_usr_img)
-        self.add_img_btn.place(x=600, y=100)
+        self.add_img_btn.place(x=600, y=107)
+        self.add_usr_btn = tkinter.Button(self.frame_user, width=20, pady=7, text='Add new user', bg='#54ab1a', fg='white',
+                                      border=0, command=self.add_new_usr)
+        self.add_usr_btn.place(x=760, y=107)
+        self.change_pswrd_btn = tkinter.Button(self.frame_user, width=20, pady=7, text='Change password', bg='#388bc2', fg='white',
+                                      border=0)
+        self.change_pswrd_btn.place(x=440, y=107)
+        self.update_usr_info_btn = tkinter.Button(self.frame_user, width=20, pady=7, text='Update user info', bg='#3c6f91', fg='white',
+                                      border=0)
+        self.update_usr_info_btn.place(x=280, y=107)
         # Set column width
         self.current_user_table.column("User Name", width=70)
         self.current_user_table.column("First name", width=70)
@@ -323,6 +366,7 @@ class Home:
         self.other_users_table.column("Prev", width=150)
         self.other_users_table.pack(fill=BOTH, expand=1)  # To show the table
         #****** General settings
+        # TODO : factory reset
         self.v = tkinter.StringVar(self.frame_general, "1")
         self.light_rb = tkinter.Radiobutton(self.frame_general, text=" Light mode ", variable=self.v,
                         value="1", font=('Microsoft YaHei UI Light', 11, 'bold'), bg='white',
@@ -350,6 +394,9 @@ class Home:
                         text='LOG', bg='#3f8ad4', fg='white', border=0,
                         command=self.start_logfile)
         self.log_btn.place(x=600, y=28)
+        self.factory_btn = tkinter.Button(self.frame_general, width=20, pady=7,
+                        text='Factory reset', bg='#f54747', fg='white', border=0,)
+        self.factory_btn.place(x=759, y=75)
 
         ############# ABOUT Tab #############
         # Create a Label to display the link
@@ -521,7 +568,7 @@ class Home:
             f.close()
         login.Login.current_user = None
         subprocess.call(['python', 'G-School.py'])
-        login.Login().start()
+        #login.Login().start()
 
     def current_user_fill(self):
         pass
@@ -571,6 +618,10 @@ class Home:
 
             messagebox.showinfo("Information", "Data saved successfully")
             home_dashboard.DashBoard.nbr_std += 1
+            if gender == 'Man':
+                home_dashboard.DashBoard.nbr_std_m += 1
+            else:
+                home_dashboard.DashBoard.nbr_std_w += 1
             self.home.update_dashboard()
             self.clear_student()
 
@@ -679,6 +730,7 @@ class Home:
             self.clear_student()
             messagebox.showinfo("Information", "Student deleted successfully")
             home_dashboard.DashBoard.nbr_std -= 1
+
             self.home.update_dashboard()
         except Exception as e:
             messagebox.showinfo("sql error:", f"{e}")
@@ -728,6 +780,10 @@ class Home:
 
             messagebox.showinfo("Information", "Data saved successfully")
             home_dashboard.DashBoard.nbr_stf += 1
+            if gender == 'Man':
+                home_dashboard.DashBoard.nbr_stf_m += 1
+            else:
+                home_dashboard.DashBoard.nbr_stf_w += 1
             self.home.update_dashboard()
             self.clear_student()
 
@@ -844,8 +900,76 @@ class Home:
         self.fetch_stuff_data()
         connection.close()
 
-    # creating db and tables
+    def add_new_usr(self):
+        self.register_window = tkinter.Toplevel(self.window)
+        self.register_window.geometry("500x500")
+        self.register_window.title("registration form")
 
+        lb1 = Label(self.register_window, text="Enter UserName", width=10, font=("arial", 12))
+        lb1.place(x=20, y=20)
+        en1 = Entry(self.register_window)
+        en1.place(x=200, y=20)
+        lb2 = Label(self.register_window, text="Enter First Name", width=10, font=("arial", 12))
+        lb2.place(x=20, y=60)
+        en2 = Entry(self.register_window)
+        en2.place(x=200, y=60)
+        lb3 = Label(self.register_window, text="Enter Last Name", width=10, font=("arial", 12))
+        lb3.place(x=20, y=120)
+        en3 = Entry(self.register_window)
+        en3.place(x=200, y=120)
+
+        lb3 = Label(self.register_window, text="Enter Email", width=10, font=("arial", 12))
+        lb3.place(x=19, y=160)
+        en3 = Entry(self.register_window)
+        en3.place(x=200, y=160)
+
+        lb4 = Label(self.register_window, text="Contact Number", width=13, font=("arial", 12))
+        lb4.place(x=19, y=200)
+        en4 = Entry(self.register_window)
+        en4.place(x=200, y=200)
+
+        lb5 = Label(self.register_window, text="Select Gender", width=15, font=("arial", 12))
+        lb5.place(x=5, y=240)
+        vars = IntVar()
+        Radiobutton(self.register_window, text="Male", padx=5, variable=vars, value=1).place(x=180, y=240)
+        Radiobutton(self.register_window, text="Female", padx=10, variable=vars, value=2).place(x=240, y=240)
+
+        list_of_cntry = ("Admin", "User", "Student", "Teacher", "Administration")
+        cv = StringVar()
+        drplist = OptionMenu(self.register_window, cv, *list_of_cntry)
+        drplist.config(width=15)
+        cv.set("United States")
+        lb2 = Label(self.register_window, text="Select Identity", width=13, font=("arial", 12))
+        lb2.place(x=14, y=280)
+        drplist.place(x=200, y=275)
+
+        lb6 = Label(self.register_window, text="Enter Password", width=13, font=("arial", 12))
+        lb6.place(x=19, y=320)
+        en6 = Entry(self.register_window, show='*')
+        en6.place(x=200, y=320)
+
+        lb7 = Label(self.register_window, text="Re-Enter Password", width=15, font=("arial", 12))
+        lb7.place(x=21, y=360)
+        en7 = Entry(self.register_window, show='*')
+        en7.place(x=200, y=360)
+
+        Button(self.register_window, text="Register", width=10).place(x=200, y=400)
+        self.register_window.mainloop()
+
+    def upload_student_img(self):
+        file_types = [('jpg Images', '*.jpg'), ('jpeg Images','*.jpeg')]
+        file = tkinter.filedialog.askopenfilename(filetypes=file_types)
+        if file:
+            pass
+            # TODO : import img to db and to frame
+
+    def upload_stuff_img(self):
+        file_types = [('jpg Images', '*.jpg'), ('jpeg Images','*.jpeg')]
+        file = tkinter.filedialog.askopenfilename(filetypes=file_types)
+        if file:
+            pass
+            # TODO : import img to db and to frame
 
     def start(self):
         self.window.mainloop()
+

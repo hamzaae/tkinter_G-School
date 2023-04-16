@@ -1,8 +1,10 @@
 import tkinter
+from tkinter import ttk
 from PIL import ImageTk, Image
 from datetime import *
 import time
 import matplotlib
+import matplotlib.pyplot as plt
 matplotlib.use('TkAgg')
 import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -11,8 +13,14 @@ import login
 
 class DashBoard:
     nbr_std = 0
+    nbr_std_m = 0
+    nbr_std_w = 0
     nbr_stf = 0
+    nbr_stf_m = 0
+    nbr_stf_w = 0
     nbr_usr = 0
+    nbr_usr_m = 0
+    nbr_usr_w = 0
     def __init__(self, window):
         # header
         '''frame'''
@@ -66,8 +74,25 @@ class DashBoard:
 
 
         '''graphs'''
-        self.plot(window)
+        self.style = ttk.Style(window)
+        self.style.configure('graph.TNotebook', tabposition='s')
+        self.style1 = ttk.Style()
+        self.style1.configure('Custom.TFrame', background="white")
+        self.graph_notebook = ttk.Notebook(window, style='graph.TNotebook', width=500, height=300)
+        self.graph_notebook.place(x=20, y=200)
+        self.students_tab = ttk.Frame(self.graph_notebook, style='Custom.TFrame')
+        self.stuff_tab = ttk.Frame(self.graph_notebook, style='Custom.TFrame')
+        self.users_tab = ttk.Frame(self.graph_notebook, style='Custom.TFrame')
+        self.graph_notebook.add(self.students_tab, text='              STUDENTS              ',
+                                image=self.t1, compound='left')
+        self.graph_notebook.add(self.stuff_tab, text='              STAFFS              ',
+                                image=self.t2, compound='left')
+        self.graph_notebook.add(self.users_tab, text='              USERS              ',
+                                image=self.t3, compound='left')
 
+        self.plot(self.students_tab)
+        self.plot_users_pie(self.users_tab)
+        self.plot2(self.stuff_tab)
 
 
     def show_time(self):
@@ -94,13 +119,45 @@ class DashBoard:
         a.set_xlabel("X", fontsize=14)
 
         canvas = FigureCanvasTkAgg(fig, master=window)
-        canvas.get_tk_widget().place(x=100, y=300)
+        canvas.get_tk_widget().pack()
+        canvas.draw()
+
+    def plot_users_pie(self, window):
+        fig = Figure(figsize=(6, 6))
+        data = [DashBoard.nbr_usr, DashBoard.nbr_stf, DashBoard.nbr_std]
+        a = fig.add_subplot(111)
+        a.pie(data, labels=['USERS', 'STUFF', 'STUDENTS'])
+        canvas = FigureCanvasTkAgg(fig, master=window)
+        canvas.get_tk_widget().pack()
+        canvas.draw()
+
+
+
+    def plot2(self,window):
+        fig = Figure(figsize=(6, 6))
+        a = fig.add_subplot(111)
+        size = 0.3
+        vals = np.array([[DashBoard.nbr_std_m, DashBoard.nbr_std_w], [DashBoard.nbr_stf_m, DashBoard.nbr_stf_w], [1., 0.]])
+
+        cmap = plt.get_cmap("tab20c")
+        outer_colors = cmap(np.arange(3) * 4)
+        inner_colors = cmap(np.array([1, 2, 5, 6, 9, 10]))
+        a.pie(vals.sum(axis=1), radius=1, colors=outer_colors,
+               wedgeprops=dict(width=size, edgecolor='w'), labels=['STUDENTS', 'STUFF', 'USERS'])
+
+        a.pie(vals.flatten(), radius=1 - size, colors=inner_colors,
+               wedgeprops=dict(width=size, edgecolor='w'))
+
+        a.set(aspect="equal", title='Users and genders pie')
+        canvas = FigureCanvasTkAgg(fig, master=window)
+        canvas.get_tk_widget().pack()
         canvas.draw()
 
     def update_dashboard(self):
         self.nbr_students.configure(text=DashBoard.nbr_std)
         self.nbr_stuffs.configure(text=DashBoard.nbr_stf)
         self.nbr_users.configure(text=DashBoard.nbr_usr)
-
-
+        self.plot(self.students_tab)
+        self.plot_users_pie(self.users_tab)
+        self.plot2(self.stuff_tab)
 

@@ -108,9 +108,16 @@ class Login:
         home_dashboard.DashBoard.nbr_std = self.mycursor.fetchone()[0]
         self.mycursor.execute("SELECT COUNT(*) FROM stuff_data")
         home_dashboard.DashBoard.nbr_stf = self.mycursor.fetchone()[0]
+        self.mycursor.execute("SELECT COUNT(*) FROM student_data WHERE gender = 'Man'")
+        home_dashboard.DashBoard.nbr_std_m = self.mycursor.fetchone()[0]
+        home_dashboard.DashBoard.nbr_std_w = home_dashboard.DashBoard.nbr_std - home_dashboard.DashBoard.nbr_std_m
+        self.mycursor.execute("SELECT COUNT(*) FROM stuff_data WHERE gender = 'Man'")
+        home_dashboard.DashBoard.nbr_stf_m = self.mycursor.fetchone()[0]
+        home_dashboard.DashBoard.nbr_stf_w = home_dashboard.DashBoard.nbr_stf - home_dashboard.DashBoard.nbr_stf_m
         # Other
         self.email_sender = 'tkinter.gschool@gmail.com'
         self.email_password = 'vizjfzoeihmxchqu'
+        # TODO : keep me logged in
 
     def start(self):
         Login.root.mainloop()
@@ -174,7 +181,6 @@ class Login:
         self.end_video.place(x=175, y=315)
         Login.app.start(Login.root, 365, 405)
 
-
     def end_video_cmd(self):
         self.end_video.destroy()
         self.signin_face_btn.configure(width=39, pady=7,
@@ -182,7 +188,6 @@ class Login:
                         command=self.on_face_signin)
         self.signin_face_btn.place(x=35, y=315)
         Login.app.end_video()
-
 
     def callback(self, url):
         webbrowser.open_new_tab(url)
