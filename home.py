@@ -957,18 +957,18 @@ class Home:
         self.register_window.mainloop()
 
     def upload_student_img(self):
-        file_types = [('jpg Images', '*.jpg'), ('jpeg Images','*.jpeg')]
+        file_types = [('jpg Images', '*.jpg'), ('jpeg Images', '*.jpeg')]
         file = tkinter.filedialog.askopenfilename(filetypes=file_types)
         if file:
             pass
-            # TODO : import img to db and to frame
+            # TODO : import img to db and to frame student
 
     def upload_stuff_img(self):
-        file_types = [('jpg Images', '*.jpg'), ('jpeg Images','*.jpeg')]
+        file_types = [('jpg Images', '*.jpg'), ('jpeg Images', '*.jpeg')]
         file = tkinter.filedialog.askopenfilename(filetypes=file_types)
         if file:
             pass
-            # TODO : import img to db and to frame
+            # TODO : import img to db and to frame stuff
 
     def start(self):
         self.window.mainloop()

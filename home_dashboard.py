@@ -89,10 +89,38 @@ class DashBoard:
                                 image=self.t2, compound='left')
         self.graph_notebook.add(self.users_tab, text='              USERS              ',
                                 image=self.t3, compound='left')
+        # Users graph 0
+        self.fig0 = Figure(figsize=(6, 6))
+        self.a = self.fig0.add_subplot(111)
+        self.data0 = [DashBoard.nbr_usr, DashBoard.nbr_stf, DashBoard.nbr_std]
+        self.a.pie(self.data0, labels=['USERS', 'STUFF', 'STUDENTS'])
+        self.canvas_a = FigureCanvasTkAgg(self.fig0, master=self.students_tab)
+        self.canvas_a.get_tk_widget().pack()
+        self.canvas_a.draw()
+        # Users graph 1
+        self.fig1 = Figure(figsize=(6, 6))
+        self.b = self.fig1.add_subplot(111)
+        size = 0.3
+        self.vals = np.array(
+            [[DashBoard.nbr_std_m, DashBoard.nbr_std_w], [DashBoard.nbr_stf_m, DashBoard.nbr_stf_w], [1., 0.]])
 
-        self.plot(self.students_tab)
-        self.plot_users_pie(self.users_tab)
-        self.plot2(self.stuff_tab)
+        self.cmap = plt.get_cmap("tab20c")
+        self.outer_colors = self.cmap(np.arange(3) * 4)
+        self.inner_colors = self.cmap(np.array([1, 2, 5, 6, 9, 10]))
+        self.b.pie(self.vals.sum(axis=1), radius=1, colors=self.outer_colors,
+              wedgeprops=dict(width=size, edgecolor='w'), labels=['STUDENTS', 'STUFF', 'USERS'])
+
+        self.b.pie(self.vals.flatten(), radius=1 - size, colors=self.inner_colors,
+              wedgeprops=dict(width=size, edgecolor='w'), labels=['M', 'W', 'M', 'W', 'M', 'W'], labeldistance=0.7)
+
+        self.b.set(aspect="equal", title='Users and genders pie')
+        # self.fig1.legend(loc=(-0.3, 0))
+        self.canvas_b = FigureCanvasTkAgg(self.fig1, master=self.users_tab)
+        self.canvas_b.get_tk_widget().pack()
+        self.canvas_b.draw()
+
+        self.plot(self.stuff_tab)
+
 
 
     def show_time(self):
@@ -122,42 +150,43 @@ class DashBoard:
         canvas.get_tk_widget().pack()
         canvas.draw()
 
-    def plot_users_pie(self, window):
-        fig = Figure(figsize=(6, 6))
-        data = [DashBoard.nbr_usr, DashBoard.nbr_stf, DashBoard.nbr_std]
-        a = fig.add_subplot(111)
-        a.pie(data, labels=['USERS', 'STUFF', 'STUDENTS'])
-        canvas = FigureCanvasTkAgg(fig, master=window)
-        canvas.get_tk_widget().pack()
-        canvas.draw()
+    def plot0(self, window):
+        self.data0 = [DashBoard.nbr_usr, DashBoard.nbr_stf, DashBoard.nbr_std]
+        if self.fig0.axes:
+            self.fig0.delaxes(self.fig0.axes[0])
+            self.canvas_a.get_tk_widget().destroy()
+        self.a = self.fig0.add_subplot(111)
+        self.a.pie(self.data0, labels=['USERS', 'STUFF', 'STUDENTS'])
+        self.canvas = FigureCanvasTkAgg(self.fig0, master=window)
+        self.canvas.get_tk_widget().pack()
+        self.canvas.draw()
 
 
 
-    def plot2(self,window):
-        fig = Figure(figsize=(6, 6))
-        a = fig.add_subplot(111)
+    def plot1(self,window):
+        self.vals = np.array(
+            [[DashBoard.nbr_std_m, DashBoard.nbr_std_w], [DashBoard.nbr_stf_m, DashBoard.nbr_stf_w], [1., 0.]])
+        if self.fig1.axes:
+            self.fig1.delaxes(self.fig1.axes[0])
+            self.canvas_b.get_tk_widget().destroy()
+        self.b = self.fig1.add_subplot(111)
         size = 0.3
-        vals = np.array([[DashBoard.nbr_std_m, DashBoard.nbr_std_w], [DashBoard.nbr_stf_m, DashBoard.nbr_stf_w], [1., 0.]])
+        self.b.pie(self.vals.sum(axis=1), radius=1, colors=self.outer_colors,
+                   wedgeprops=dict(width=size, edgecolor='w'), labels=['STUDENTS', 'STUFF', 'USERS'])
 
-        cmap = plt.get_cmap("tab20c")
-        outer_colors = cmap(np.arange(3) * 4)
-        inner_colors = cmap(np.array([1, 2, 5, 6, 9, 10]))
-        a.pie(vals.sum(axis=1), radius=1, colors=outer_colors,
-               wedgeprops=dict(width=size, edgecolor='w'), labels=['STUDENTS', 'STUFF', 'USERS'])
+        self.b.pie(self.vals.flatten(), radius=1 - size, colors=self.inner_colors,
+                   wedgeprops=dict(width=size, edgecolor='w'), labels=['M', 'W', 'M', 'W', 'M', 'W'])
 
-        a.pie(vals.flatten(), radius=1 - size, colors=inner_colors,
-               wedgeprops=dict(width=size, edgecolor='w'))
-
-        a.set(aspect="equal", title='Users and genders pie')
-        canvas = FigureCanvasTkAgg(fig, master=window)
-        canvas.get_tk_widget().pack()
-        canvas.draw()
+        self.b.set(aspect="equal", title='Users and genders pie')
+        self.canvas_b = FigureCanvasTkAgg(self.fig1, master=window)
+        self.canvas_b.get_tk_widget().pack()
+        self.canvas_b.draw()
 
     def update_dashboard(self):
         self.nbr_students.configure(text=DashBoard.nbr_std)
         self.nbr_stuffs.configure(text=DashBoard.nbr_stf)
         self.nbr_users.configure(text=DashBoard.nbr_usr)
-        self.plot(self.students_tab)
-        self.plot_users_pie(self.users_tab)
-        self.plot2(self.stuff_tab)
+        self.plot(self.stuff_tab)
+        self.plot0(self.students_tab)
+        self.plot1(self.users_tab)
 
