@@ -90,16 +90,16 @@ class DashBoard:
         self.graph_notebook.add(self.users_tab, text='              USERS              ',
                                 image=self.t3, compound='left')
         # Users graph 0
-        self.fig0 = Figure(figsize=(6, 6))
-        self.a = self.fig0.add_subplot(111)
+        self.fig0 = Figure(figsize=(8, 6))
+        self.a = self.fig0.add_subplot(121)
         self.data0 = [DashBoard.nbr_usr, DashBoard.nbr_stf, DashBoard.nbr_std]
         self.a.pie(self.data0, labels=['USERS', 'STUFF', 'STUDENTS'])
         self.canvas_a = FigureCanvasTkAgg(self.fig0, master=self.students_tab)
         self.canvas_a.get_tk_widget().pack()
         self.canvas_a.draw()
         # Users graph 1
-        self.fig1 = Figure(figsize=(6, 6))
-        self.b = self.fig1.add_subplot(111)
+        self.fig1 = Figure(figsize=(8, 6))
+        self.b = self.fig1.add_subplot(121)
         size = 0.3
         self.vals = np.array(
             [[DashBoard.nbr_std_m, DashBoard.nbr_std_w], [DashBoard.nbr_stf_m, DashBoard.nbr_stf_w], [1., 0.]])
@@ -118,6 +118,31 @@ class DashBoard:
         self.canvas_b = FigureCanvasTkAgg(self.fig1, master=self.users_tab)
         self.canvas_b.get_tk_widget().pack()
         self.canvas_b.draw()
+
+        self.c = self.fig1.add_subplot(122)
+        with open('logins_nbr.txt', 'r') as f:
+            data = f.readlines()[1:]
+
+        # separate date and number_of_logins into separate lists
+        dates = []
+        logins = []
+        for d in data:
+            date, num_logins = d.strip().split(':')
+            dates.append(date)
+            logins.append(int(num_logins))
+        if len(dates) > 6:
+            dates = dates[-6:]
+            logins = logins[-6:]
+        # plot data
+        self.c.plot(dates, logins)
+        #self.c.set_xlabel('Date')
+        #self.c.set_ylabel('Number of logins')
+        self.c.set_title('Number of logins')
+        self.fig1.autofmt_xdate()
+        self.fig1.tight_layout(pad=7.0)
+        self.canvas_c = FigureCanvasTkAgg(self.fig1, master=self.users_tab)
+        self.canvas_c.get_tk_widget().pack()
+        self.canvas_c.draw()
 
         self.plot(self.stuff_tab)
 

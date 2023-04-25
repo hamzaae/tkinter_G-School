@@ -2,7 +2,6 @@ import os
 import smtplib
 import ssl
 import tkinter
-#from configparser import ConfigParser
 from tkinter import ttk
 from tkinter.filedialog import askopenfile
 from PIL import Image as pimg, ImageTk

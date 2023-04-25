@@ -11,7 +11,6 @@ import mysql.connector
 import hashlib
 import random
 import string
-#from configparser import ConfigParser
 import home
 import home_dashboard
 
@@ -137,6 +136,25 @@ class Login:
             with open(Login.log_path, 'a') as f:
                 f.write('{}{}{}\n'.format(Login.current_user[1], " logged in using keep me at ", datetime.datetime.now()))
                 f.close()
+            with open('logins_nbr.txt', "r") as f:
+                lines = f.readlines()
+
+            last_line = lines[-1].strip()
+            now = datetime.datetime.now()
+            today = str(now.date())
+            if last_line.split(':')[0] == today:
+                parts = last_line.split(':')
+                parts[-1] = ':'+str(int(parts[-1])+1)
+                new_last_line = "".join(parts)
+
+                lines[-1] = new_last_line
+
+                with open('logins_nbr.txt', "w") as f:
+                    f.writelines(lines)
+            else:
+                with open('logins_nbr.txt', "a") as f:
+                    f.write(f'\n{today}:1')
+
             Login.root.destroy()
             main_home = home.Home()
             main_home.start()
@@ -191,6 +209,7 @@ class Login:
             if self.keep_me.get() == 1:
                 self.mycursor.execute("UPDATE users SET keepme = true WHERE username = %s",(username_input,))
                 self.mydb.commit()
+
             Login.root.destroy()
             main_home = home.Home()
             main_home.start()
