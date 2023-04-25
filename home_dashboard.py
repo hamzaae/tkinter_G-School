@@ -141,7 +141,7 @@ class DashBoard:
         self.canvas_b.draw()
 
         self.c = self.fig1.add_subplot(122)
-        with open('logins_nbr.txt', 'r') as f:
+        with open('log/logins_nbr.txt', 'r') as f:
             data = f.readlines()[1:]
 
         # separate date and number_of_logins into separate lists

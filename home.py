@@ -583,7 +583,7 @@ class Home:
         pass
 
     def start_logfile(self):
-        os.startfile("log.txt")
+        os.startfile("log/log.txt")
 
     ## Students main functions
 
