@@ -2,6 +2,7 @@ import os
 import smtplib
 import ssl
 import tkinter
+#from configparser import ConfigParser
 from tkinter import ttk
 from tkinter.filedialog import askopenfile
 from PIL import Image as pimg, ImageTk
@@ -19,7 +20,14 @@ import mysql.connector
 
 class Home:
     def __init__(self):
-        # Creating dataBase and necessary tables
+        # Creating dataBase and necessary tables and connecting to db
+        self.mydb = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="password123",
+            database="g_school"
+        )
+        self.mycursor = self.mydb.cursor()
 
         # Initialize main window
         self.window = tkinter.Tk()
@@ -567,6 +575,8 @@ class Home:
             f.write('{}{}{}\n'.format(login.Login.current_user[1], " logged out at ", datetime.datetime.now()))
             f.close()
         login.Login.current_user = None
+        self.mycursor.execute("UPDATE users SET keepme = false WHERE keepme = true")
+        self.mydb.commit()
         subprocess.call(['python', 'G-School.py'])
         #login.Login().start()
 

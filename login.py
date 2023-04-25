@@ -11,6 +11,7 @@ import mysql.connector
 import hashlib
 import random
 import string
+#from configparser import ConfigParser
 import home
 import home_dashboard
 
@@ -70,6 +71,13 @@ class Login:
         self.checkBox_showPassword = tkinter.Button(self.frame, text="👁", bg='white',
                         borderwidth=0, font=('verdana', 14), command=self.show_and_hide)
         self.checkBox_showPassword.place(x=280, y=195)
+        # 5-keep me logged in
+        self.keep_me = tkinter.IntVar()
+
+        self.keep_me_btn = tkinter.Checkbutton(self.frame, text="Keep me logged in ",
+                        variable=self.keep_me, onvalue=1, offvalue=0,
+                        font=('verdana', 9), bg='white')
+        self.keep_me_btn.place(x=30, y=240)
         # add signin and face_signin buttons
         self.signin_btn = tk.Button(self.frame, width=39, pady=7, text='Sign in',
                         bg='#6cc570', fg='white', border=0,
@@ -120,7 +128,18 @@ class Login:
         # TODO : keep me logged in
 
     def start(self):
-        Login.root.mainloop()
+        self.mycursor.execute("SELECT * FROM users WHERE keepme = true")
+        Login.current_user = self.mycursor.fetchone()
+        if Login.current_user == None:
+            Login.root.mainloop()
+        else:
+            Login.app.end_video()
+            with open(Login.log_path, 'a') as f:
+                f.write('{}{}{}\n'.format(Login.current_user[1], " logged in using keep me at ", datetime.datetime.now()))
+                f.close()
+            Login.root.destroy()
+            main_home = home.Home()
+            main_home.start()
 
     def on_enter_user(self, e):
         if self.user.get() == "Username":
@@ -169,6 +188,9 @@ class Login:
             with open(Login.log_path, 'a') as f:
                 f.write('{}{}{}\n'.format(Login.current_user[1], " logged in at ", datetime.datetime.now()))
                 f.close()
+            if self.keep_me.get() == 1:
+                self.mycursor.execute("UPDATE users SET keepme = true WHERE username = %s",(username_input,))
+                self.mydb.commit()
             Login.root.destroy()
             main_home = home.Home()
             main_home.start()
@@ -238,4 +260,6 @@ class Login:
         for _ in range(10):
             password += random.choice(chars)
         return password
+
+
 
