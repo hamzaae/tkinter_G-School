@@ -21,6 +21,17 @@ class DashBoard:
     nbr_usr = 0
     nbr_usr_m = 0
     nbr_usr_w = 0
+    nbr_std_ap1 = 0
+    nbr_std_ap2 = 0
+    nbr_std_id1 = 0
+    nbr_std_id2 = 0
+    nbr_std_id3 = 0
+    nbr_std_gi1 = 0
+    nbr_std_gi2 = 0
+    nbr_std_gigl = 0
+    nbr_std_gibi = 0
+    nbr_std_gc1 = 0
+    nbr_std_gc2 = 0
     def __init__(self, window):
         # header
         '''frame'''
@@ -89,14 +100,24 @@ class DashBoard:
                                 image=self.t2, compound='left')
         self.graph_notebook.add(self.users_tab, text='              USERS              ',
                                 image=self.t3, compound='left')
-        # Users graph 0
+        # Students graph 0
         self.fig0 = Figure(figsize=(8, 6))
-        self.a = self.fig0.add_subplot(121)
-        self.data0 = [DashBoard.nbr_usr, DashBoard.nbr_stf, DashBoard.nbr_std]
-        self.a.pie(self.data0, labels=['USERS', 'STUFF', 'STUDENTS'])
+        self.a = self.fig0.add_subplot(221)
+        self.data00 = [DashBoard.nbr_std_ap1, DashBoard.nbr_std_ap2]
+        self.a.pie(self.data00, labels=['AP1', 'AP2'])
+        self.a.set(aspect="equal", title='CP STUDENTS')
         self.canvas_a = FigureCanvasTkAgg(self.fig0, master=self.students_tab)
         self.canvas_a.get_tk_widget().pack()
         self.canvas_a.draw()
+        self.d = self.fig0.add_subplot(222)
+        self.data01 = [DashBoard.nbr_std_id1, DashBoard.nbr_std_id2,DashBoard.nbr_std_id3,
+                       DashBoard.nbr_std_gi2, DashBoard.nbr_std_gi2, DashBoard.nbr_std_gigl,
+                       DashBoard.nbr_std_gibi, DashBoard.nbr_std_gc1, DashBoard.nbr_std_gc2]
+        self.d.pie(self.data01, labels=['ID1', 'ID2', 'ID3', 'GI1', 'GI2', 'GI-GL', 'GI-BI', 'GC1', 'GC2'])
+        self.d.set(aspect="equal", title='CI STUDENTS')
+        self.canvas_d = FigureCanvasTkAgg(self.fig0, master=self.students_tab)
+        self.canvas_d.get_tk_widget().pack()
+        self.canvas_d.draw()
         # Users graph 1
         self.fig1 = Figure(figsize=(8, 6))
         self.b = self.fig1.add_subplot(121)

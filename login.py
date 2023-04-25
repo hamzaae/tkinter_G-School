@@ -121,10 +121,32 @@ class Login:
         self.mycursor.execute("SELECT COUNT(*) FROM stuff_data WHERE gender = 'Man'")
         home_dashboard.DashBoard.nbr_stf_m = self.mycursor.fetchone()[0]
         home_dashboard.DashBoard.nbr_stf_w = home_dashboard.DashBoard.nbr_stf - home_dashboard.DashBoard.nbr_stf_m
+        self.mycursor.execute("SELECT COUNT(*) FROM student_data WHERE field = 'AP1'")
+        home_dashboard.DashBoard.nbr_std_ap1 = self.mycursor.fetchone()[0]
+        self.mycursor.execute("SELECT COUNT(*) FROM student_data WHERE field = 'AP2'")
+        home_dashboard.DashBoard.nbr_std_ap2 = self.mycursor.fetchone()[0]
+        self.mycursor.execute("SELECT COUNT(*) FROM student_data WHERE field = 'ID1'")
+        home_dashboard.DashBoard.nbr_std_id1 = self.mycursor.fetchone()[0]
+        self.mycursor.execute("SELECT COUNT(*) FROM student_data WHERE field = 'ID2'")
+        home_dashboard.DashBoard.nbr_std_id2 = self.mycursor.fetchone()[0]
+        self.mycursor.execute("SELECT COUNT(*) FROM student_data WHERE field = 'ID3'")
+        home_dashboard.DashBoard.nbr_std_id3 = self.mycursor.fetchone()[0]
+        self.mycursor.execute("SELECT COUNT(*) FROM student_data WHERE field = 'GI2'")
+        home_dashboard.DashBoard.nbr_std_gi1 = self.mycursor.fetchone()[0]
+        self.mycursor.execute("SELECT COUNT(*) FROM student_data WHERE field = 'GI1'")
+        home_dashboard.DashBoard.nbr_std_gi2 = self.mycursor.fetchone()[0]
+        self.mycursor.execute("SELECT COUNT(*) FROM student_data WHERE field = 'GI-GL'")
+        home_dashboard.DashBoard.nbr_std_gigl = self.mycursor.fetchone()[0]
+        self.mycursor.execute("SELECT COUNT(*) FROM student_data WHERE field = 'GI-BI'")
+        home_dashboard.DashBoard.nbr_std_gibi = self.mycursor.fetchone()[0]
+        self.mycursor.execute("SELECT COUNT(*) FROM student_data WHERE field = 'GC1'")
+        home_dashboard.DashBoard.nbr_std_gc1 = self.mycursor.fetchone()[0]
+        self.mycursor.execute("SELECT COUNT(*) FROM student_data WHERE field = 'GC2'")
+        home_dashboard.DashBoard.nbr_std_gc2 = self.mycursor.fetchone()[0]
+        # TODO : all fields
         # Other
         self.email_sender = 'tkinter.gschool@gmail.com'
         self.email_password = 'vizjfzoeihmxchqu'
-        # TODO : keep me logged in
 
     def start(self):
         self.mycursor.execute("SELECT * FROM users WHERE keepme = true")
