@@ -345,9 +345,9 @@ class Home:
         # fill table -->
         #0
 
-        self.user_info = (login.Login.current_user[1],login.Login.current_user[1],
-                          login.Login.current_user[1],login.Login.current_user[4],
-                          login.Login.current_user[5],login.Login.current_user[3])
+        self.user_info = (login.Login.current_user[0],login.Login.current_user[0],
+                          login.Login.current_user[0],login.Login.current_user[3],
+                          login.Login.current_user[4],login.Login.current_user[2])
         self.current_user_table.insert('','end',values=self.user_info)
         #****** Other users table
         self.other_users_label = tkinter.Label(self.frame_user, text="Other users",
@@ -499,6 +499,8 @@ class Home:
         self.gender_label.configure(fg="black", bg="white")
         self.phone_label.configure(fg="black", bg="white")
         self.address_label.configure(fg="black", bg="white")
+        #dashboard
+        self.home.set_light_mode()
 
     def set_dark_mode(self):
         self.style1.configure('Custom.TFrame', background='#26242f')
@@ -531,6 +533,8 @@ class Home:
         self.gender_label.configure(bg="#26242f", fg="white")
         self.phone_label.configure(bg="#26242f", fg="white")
         self.address_label.configure(bg="#26242f", fg="white")
+        #dashboard
+        self.home.set_dark_mode()
 
     #0
     def mail_receive(self,Subject, To, Message):
@@ -583,7 +587,7 @@ class Home:
         pass
 
     def start_logfile(self):
-        os.startfile("log/log.txt")
+        os.startfile("log\\log.txt")
 
     ## Students main functions
 

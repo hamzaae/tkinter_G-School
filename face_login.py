@@ -64,6 +64,9 @@ class App_face:
                     f.write('{}{}{}\n'.format(login.Login.current_user[1], " logged in using face signin at ",
                                               datetime.datetime.now()))
                     f.close()
+                if login.Login.keep_me_glob == 1:
+                    self.mycursor.execute("UPDATE users SET keepme = true WHERE username = %s", (name,))
+                    self.mydb.commit()
                 login.Login.root.destroy()
                 main_home = home.Home()
                 main_home.start()

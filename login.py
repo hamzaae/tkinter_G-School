@@ -20,6 +20,7 @@ class Login:
     current_user = {}
     app = face_login.App_face()
     root = tk.Tk()
+    keep_me_glob = 0
     def __init__(self):
         # Create the window
         Login.root.title('G-School LOGIN')
@@ -75,7 +76,7 @@ class Login:
 
         self.keep_me_btn = tkinter.Checkbutton(self.frame, text="Keep me logged in ",
                         variable=self.keep_me, onvalue=1, offvalue=0,
-                        font=('verdana', 9), bg='white')
+                        font=('verdana', 9), bg='white', command=self.keep_me_func)
         self.keep_me_btn.place(x=30, y=240)
         # add signin and face_signin buttons
         self.signin_btn = tk.Button(self.frame, width=39, pady=7, text='Sign in',
@@ -210,6 +211,9 @@ class Login:
             self.pswrd['show'] = ''
         else:
             self.pswrd['show'] = '*'
+
+    def keep_me_func(self):
+        Login.keep_me_glob = self.keep_me.get()
 
     def on_signin(self):
         # users' inputs

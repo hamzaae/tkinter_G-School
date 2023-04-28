@@ -44,11 +44,11 @@ class DashBoard:
         self.curr_img_fr.place(x=820, y=5, width=82, height=105)
         self.curr_img_lbl = tkinter.Label(self.curr_img_fr, image=self.curr_img)
         self.curr_img_lbl.pack()
-        self.curr_name = tkinter.Label(self.header, text=login.Login.current_user[1],font=('MS Serif', 17,'bold'))
+        self.curr_name = tkinter.Label(self.header, text=login.Login.current_user[0],font=('MS Serif', 17,'bold'))
         self.curr_name.place(x=800, y=30, anchor="e")
-        self.curr_type = tkinter.Label(self.header, text=login.Login.current_user[3],font=('MS sans Serif', 13))
+        self.curr_type = tkinter.Label(self.header, text=login.Login.current_user[2],font=('MS sans Serif', 13))
         self.curr_type.place(x=800, y=60, anchor="e")
-        self.curr_mail = tkinter.Label(self.header, text=login.Login.current_user[4],font=('MS sans Serif', 10))
+        self.curr_mail = tkinter.Label(self.header, text=login.Login.current_user[3],font=('MS sans Serif', 10))
         self.curr_mail.place(x=800, y=90, anchor="e")
 
         '''date and time'''
@@ -102,14 +102,14 @@ class DashBoard:
                                 image=self.t3, compound='left')
         # Students graph 0
         self.fig0 = Figure(figsize=(8, 6))
-        self.a = self.fig0.add_subplot(221)
+        self.a = self.fig0.add_subplot(121)
         self.data00 = [DashBoard.nbr_std_ap1, DashBoard.nbr_std_ap2]
         self.a.pie(self.data00, labels=['AP1', 'AP2'])
         self.a.set(aspect="equal", title='CP STUDENTS')
         self.canvas_a = FigureCanvasTkAgg(self.fig0, master=self.students_tab)
         self.canvas_a.get_tk_widget().pack()
         self.canvas_a.draw()
-        self.d = self.fig0.add_subplot(222)
+        self.d = self.fig0.add_subplot(122)
         self.data01 = [DashBoard.nbr_std_id1, DashBoard.nbr_std_id2,DashBoard.nbr_std_id3,
                        DashBoard.nbr_std_gi2, DashBoard.nbr_std_gi2, DashBoard.nbr_std_gigl,
                        DashBoard.nbr_std_gibi, DashBoard.nbr_std_gc1, DashBoard.nbr_std_gc2]
@@ -235,4 +235,20 @@ class DashBoard:
         self.plot(self.stuff_tab)
         self.plot0(self.students_tab)
         self.plot1(self.users_tab)
+
+    def set_dark_mode(self):
+        self.studnts_lbl.configure(bg='#26242f', fg="white")
+        self.hr_lbl.configure(bg='#26242f', fg="white")
+        self.users_lbl.configure(bg='#26242f', fg="white")
+        self.nbr_users.configure(bg='#26242f', fg="white")
+        self.nbr_stuffs.configure(bg='#26242f', fg="white")
+        self.nbr_students.configure(bg='#26242f', fg="white")
+
+    def set_light_mode(self):
+        self.studnts_lbl.configure(fg="black", bg="white")
+        self.hr_lbl.configure(fg="black", bg="white")
+        self.users_lbl.configure(fg="black", bg="white")
+        self.nbr_users.configure(fg="black", bg="white")
+        self.nbr_stuffs.configure(fg="black", bg="white")
+        self.nbr_students.configure(fg="black", bg="white")
 
