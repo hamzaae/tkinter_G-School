@@ -1,3 +1,4 @@
+import csv
 import hashlib
 import smtplib
 import ssl
@@ -181,13 +182,13 @@ class Home:
         self.button.grid(row=0, column=3, padx=10, pady=10)
         ## import Button
         self.import_csv_button = tkinter.Button(self.students_tab, text="Import from CSV", fg="#001433", bg="#ff0080",
-                                                width=15, command=self.clear_stuff)
+                                                width=15, command=self.import_student)
         self.import_csv_button.place(x=770, y=460)
         ## Export Button
-        self.import_csv_button = tkinter.Button(self.students_tab, text="Export to CSV", fg="#001433", bg="#00ff80",
+        self.export_csv_button = tkinter.Button(self.students_tab, text="Export to CSV", fg="#001433", bg="#00ff80",
                                                 width=15,
                                                 command=self.export_student)
-        self.import_csv_button.place(x=770, y=500)
+        self.export_csv_button.place(x=770, y=500)
         ## Search by (label and button)
         self.student_search_label = tkinter.Label(self.students_tab, text="Search by", fg="crimson", bg="white")
         self.student_search_label.place(x=770, y=250)
@@ -315,13 +316,13 @@ class Home:
         self.import_csv_button = tkinter.Button(self.stuff_button_frame, text="Import from CSV", fg="#001433", bg="green", width=20,command=self.clear_stuff)
         self.import_csv_button.grid(row=0, column=4, padx=10, pady=10)
         ## import Button
-        self.import_csv_button = tkinter.Button(self.hr_tab, text="Import from CSV", fg="#001433", bg="#00ffff",
+        self.import_csv_button_hr = tkinter.Button(self.hr_tab, text="Import from CSV", fg="#001433", bg="#00ffff",
                                                 width=15, command=self.clear_stuff)
-        self.import_csv_button.place(x=770, y=460)
+        self.import_csv_button_hr.place(x=770, y=460)
         ## Export Button
-        self.import_csv_button = tkinter.Button(self.hr_tab, text="Export to CSV", fg="#001433", bg="#00ff80", width=15,
+        self.export_csv_button_hr = tkinter.Button(self.hr_tab, text="Export to CSV", fg="#001433", bg="#00ff80", width=15,
                                                 command=self.export_stuff)
-        self.import_csv_button.place(x=770, y=500)
+        self.export_csv_button_hr.place(x=770, y=500)
         ## Search by (label and button)
         self.stuff_search_label = tkinter.Label(self.hr_tab, text="Search by", fg="green", bg="white")
         self.stuff_search_label.place(x=770, y=250)
@@ -1090,6 +1091,39 @@ class Home:
 
             df.to_csv(rf'{file_path}\Student_data.csv')
 
+    def import_student(self):
+        # Prompt the user to select the CSV file to import
+        root = Tk()
+        root.withdraw()
+        file_path = filedialog.askopenfilename()
+
+        # Establish a connection to the MySQL database
+        db = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="password123",
+            database="g_school"
+        )
+
+        # Create a cursor object to interact with the database
+        cursor = db.cursor()
+
+        # Open the CSV file and insert the data into the table
+        with open(file_path, 'r') as csvfile:
+            csvreader = csv.DictReader(csvfile)
+            for row in csvreader:
+                insert_query = "INSERT INTO student_data (cne, first_name, last_name, email, gender, phone, address, field, imagepath) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+                values = (row['cne'], row['first_name'], row['last_name'], row['email'], row['gender'], row['phone'],
+                          row['address'],row['field'],row['imagepath'])
+                cursor.execute(insert_query, values)
+
+        # Commit the changes to the database and close the connection
+        db.commit()
+        db.close()
+        self.fetch_student_data()
+
+
+
     # User functions
     def add_new_usr(self):
         self.register_window = tkinter.Toplevel(self.window)
@@ -1405,8 +1439,6 @@ class Home:
         if file:
             pass
             # TODO : import img to db and to frame stuff
-
-
 
     def start(self):
         self.window.mainloop()
