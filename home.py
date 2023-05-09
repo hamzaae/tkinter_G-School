@@ -1,4 +1,4 @@
-import os
+import hashlib
 import smtplib
 import ssl
 import tkinter
@@ -15,6 +15,9 @@ import login
 import home_dashboard
 from tkinter import messagebox
 import mysql.connector
+import pandas as pd
+import os
+from tkinter import filedialog
 
 
 class Home:
@@ -48,6 +51,10 @@ class Home:
         self.email = StringVar()
         self.gender = StringVar()
         self.phone = StringVar()
+        self.student_entry_search = StringVar()
+        self.student_search = StringVar()
+        self.image_student_path = StringVar()
+        self.field = StringVar()
 
         # 0-1 ================ Set all variables for stuff ==========================
         self.cin = StringVar()
@@ -56,6 +63,19 @@ class Home:
         self.stuff_email = StringVar()
         self.stuff_gender = StringVar()
         self.stuff_phone = StringVar()
+        self.stuff_search = StringVar()
+        self.stuff_entry_search = StringVar()
+
+        # 0-1 =============== Set all variables for users ===========================
+        self.username = StringVar()
+        self.user_first_name = StringVar()
+        self.user_last_name = StringVar()
+        self.user_email = StringVar()
+        self.user_gender = StringVar()
+        self.user_contact = StringVar()
+        self.user_identity = StringVar()
+        self.user_password0 = StringVar()
+        self.user_password1 = StringVar()
 
         # tabs config: creation, icons, add to notebook
         ## 1-creation
@@ -132,11 +152,18 @@ class Home:
         self.phone_label_entry = tkinter.Entry(self.students_info_frame, bg="#f2f2f2", validate="key",textvariable=self.phone,
                                 validatecommand=(self.vcmd_phone, '%P'))
         self.phone_label_entry.grid(row=4, column=0, padx=10, pady=30)
+        ## field
+        self.field_label = tkinter.Label(self.students_info_frame, text="Field", bg="white")
+        val_fields = ['AP1','AP2','ID1','ID2','ID3','GI1','GI2','GI-GL','GI-BI','GC1','GC2']
+        self.field_combobox = ttk.Combobox(self.students_info_frame, values=val_fields, state="readonly",
+                                            textvariable=self.field)
+        self.field_label.grid(row=3, column=2, padx=10)
+        self.field_combobox.grid(row=4, column=2, padx=10, pady=30)
         ## Address
         self.address_label = tkinter.Label(self.students_info_frame, text="Address", bg="white")
-        self.address_label.grid(row=3, column=2)
-        self.address_label_entry = Text(self.students_info_frame, width=40, height=2, bg="#f2f2f2")
-        self.address_label_entry.grid(row=4, column=2, columnspan=10, rowspan=10, padx=10)
+        self.address_label.grid(row=3, column=3)
+        self.address_label_entry = Text(self.students_info_frame, width=20, height=2, bg="#f2f2f2")
+        self.address_label_entry.grid(row=4, column=3, columnspan=10, rowspan=10, padx=10)
         #****** Buttons frame
         self.button_frame = Frame(self.students_tab, bg="white")
         self.button_frame.place(x=40, y=200, height=50, width=680)
@@ -152,6 +179,35 @@ class Home:
         ## Clear Button
         self.button = tkinter.Button(self.button_frame, text="Clear", fg="#001433", bg="crimson", width=20,command=self.clear_student)
         self.button.grid(row=0, column=3, padx=10, pady=10)
+        ## import Button
+        self.import_csv_button = tkinter.Button(self.students_tab, text="Import from CSV", fg="#001433", bg="#ff0080",
+                                                width=15, command=self.clear_stuff)
+        self.import_csv_button.place(x=770, y=460)
+        ## Export Button
+        self.import_csv_button = tkinter.Button(self.students_tab, text="Export to CSV", fg="#001433", bg="#00ff80",
+                                                width=15,
+                                                command=self.export_student)
+        self.import_csv_button.place(x=770, y=500)
+        ## Search by (label and button)
+        self.student_search_label = tkinter.Label(self.students_tab, text="Search by", fg="crimson", bg="white")
+        self.student_search_label.place(x=770, y=250)
+        self.student_search_combobox = ttk.Combobox(self.students_tab, values=["Cin", "Phone", "Email"],
+                                                    state="readonly",
+                                                    textvariable=self.student_search, width=6)
+        self.student_search_combobox.place(x=835, y=250)
+        self.student_search_combobox.set("Cne")
+
+        self.student_search_entry = tkinter.Entry(self.students_tab, bg="#f2f2f2",
+                                                  textvariable=self.student_entry_search)
+        self.student_search_entry.place(x=770, y=280)
+
+        self.student_search_button = tkinter.Button(self.students_tab, text="Search", fg="black", bg="#00ff80",
+                                                    command=self.search_student)
+        self.student_search_button.place(x=848, y=305)
+        ## Show all button
+        self.student_showAll_button = tkinter.Button(self.students_tab, text="Show all", fg="black", bg="#00ff80",
+                                                     command=self.fetch_student_data)
+        self.student_showAll_button.place(x=770, y=305)
         #****** Students table
         self.students_table_frame = Frame(self.students_tab, bg="crimson")
         self.students_table_frame.place(x=10, y=250, height=280, width=750)
@@ -160,7 +216,7 @@ class Home:
         self.scroll_x = Scrollbar(self.table_frame, orient=HORIZONTAL)
         self.scroll_y = Scrollbar(self.table_frame, orient=VERTICAL)
         self.student_table = ttk.Treeview(self.table_frame,
-                        columns=("Cne", "First name", "Last name", "Email", "Gender", "Phone", "Address"),
+                        columns=("Cne", "First name", "Last name", "Email", "Gender", "Phone", "Address", "Field"),
                         xscrollcommand=self.scroll_x.set, yscrollcommand=self.scroll_y.set)
         self.scroll_x.pack(side=BOTTOM, fill=X)
         self.scroll_y.pack(side=RIGHT, fill=Y)
@@ -173,14 +229,16 @@ class Home:
         self.student_table.heading("Gender", text="Gender")
         self.student_table.heading("Phone", text="Phone")
         self.student_table.heading("Address", text="Address")
+        self.student_table.heading("Field", text="Field")
         self.student_table["show"] = 'headings'
-        self.student_table.column("Cne", width=100)
-        self.student_table.column("First name", width=100)
-        self.student_table.column("Last name", width=100)
-        self.student_table.column("Email", width=150)
+        self.student_table.column("Cne", width=80)
+        self.student_table.column("First name", width=80)
+        self.student_table.column("Last name", width=80)
+        self.student_table.column("Email", width=130)
         self.student_table.column("Gender", width=50)
-        self.student_table.column("Phone", width=150)
-        self.student_table.column("Address", width=150)
+        self.student_table.column("Phone", width=90)
+        self.student_table.column("Address", width=140)
+        self.student_table.column("Field", width=50)
         self.student_table.pack(fill=BOTH, expand=1)  # To show the table
         #
         self.student_table.bind("<ButtonRelease-1>", self.get_cursor)
@@ -256,6 +314,32 @@ class Home:
         self.stuff_button.grid(row=0, column=3, padx=10, pady=10)
         self.import_csv_button = tkinter.Button(self.stuff_button_frame, text="Import from CSV", fg="#001433", bg="green", width=20,command=self.clear_stuff)
         self.import_csv_button.grid(row=0, column=4, padx=10, pady=10)
+        ## import Button
+        self.import_csv_button = tkinter.Button(self.hr_tab, text="Import from CSV", fg="#001433", bg="#00ffff",
+                                                width=15, command=self.clear_stuff)
+        self.import_csv_button.place(x=770, y=460)
+        ## Export Button
+        self.import_csv_button = tkinter.Button(self.hr_tab, text="Export to CSV", fg="#001433", bg="#00ff80", width=15,
+                                                command=self.export_stuff)
+        self.import_csv_button.place(x=770, y=500)
+        ## Search by (label and button)
+        self.stuff_search_label = tkinter.Label(self.hr_tab, text="Search by", fg="green", bg="white")
+        self.stuff_search_label.place(x=770, y=250)
+        self.stuff_search_combobox = ttk.Combobox(self.hr_tab, values=["Cin", "Phone", "Email"], state="readonly",
+                                                  textvariable=self.stuff_search, width=6)
+        self.stuff_search_combobox.place(x=835, y=250)
+        self.stuff_search_combobox.set("Cin")
+
+        self.stuff_search_entry = tkinter.Entry(self.hr_tab, bg="#f2f2f2", textvariable=self.stuff_entry_search)
+        self.stuff_search_entry.place(x=770, y=280)
+
+        self.stuff_search_button = tkinter.Button(self.hr_tab, text="Search", fg="black", bg="#00ff80",
+                                                  command=self.search_stuff)
+        self.stuff_search_button.place(x=848, y=305)
+        ## Show all button
+        self.stuff_showAll_button = tkinter.Button(self.hr_tab, text="Show all", fg="black", bg="#00ff80",
+                                                   command=self.fetch_stuff_data)
+        self.stuff_showAll_button.place(x=770, y=305)
         #****** Stuff table
         self.stuff_table_frame = Frame(self.hr_tab, bg="green")
         self.stuff_table_frame.place(x=10, y=250, height=280, width=750)
@@ -332,7 +416,7 @@ class Home:
                                       border=0)
         self.change_pswrd_btn.place(x=440, y=107)
         self.update_usr_info_btn = tkinter.Button(self.frame_user, width=20, pady=7, text='Update user info', bg='#3c6f91', fg='white',
-                                      border=0)
+                                      border=0, command=self.update_user_info)
         self.update_usr_info_btn.place(x=280, y=107)
         # Set column width
         self.current_user_table.column("User Name", width=70)
@@ -345,33 +429,34 @@ class Home:
         # fill table -->
         #0
 
-        self.user_info = (login.Login.current_user[0],login.Login.current_user[0],
-                          login.Login.current_user[0],login.Login.current_user[3],
+        self.user_info = (login.Login.current_user[0],login.Login.current_user[6],
+                          login.Login.current_user[7],login.Login.current_user[3],
                           login.Login.current_user[4],login.Login.current_user[2])
         self.current_user_table.insert('','end',values=self.user_info)
-        #****** Other users table
+        # ****** Other users table
         self.other_users_label = tkinter.Label(self.frame_user, text="Other users",
-                            font=('Helveticabold', 13, "bold"), bg="white", fg="red")
+                                               font=('Helveticabold', 13, "bold"), bg="white", fg="red")
         self.other_users_label.place(x=0, y=150)
         self.table_frame1 = Frame(self.frame_user, bg="#101433")
         self.table_frame1.place(x=1, y=180, width=790, height=150)
         self.scroll_y = Scrollbar(self.table_frame1, orient=VERTICAL)
         self.other_users_table = ttk.Treeview(self.table_frame1,
-                            columns=("Cin", "First name", "Last name", "Prev"),
-                            yscrollcommand=self.scroll_y.set)
+                                              columns=("First name", "Last name", "Prev"),
+                                              yscrollcommand=self.scroll_y.set)
         self.scroll_y.pack(side=RIGHT, fill=Y)
         self.scroll_y.config(command=self.other_users_table.yview)
-        self.other_users_table.heading("Cin", text="Cin")
         self.other_users_table.heading("First name", text="First name")
         self.other_users_table.heading("Last name", text="Last name")
         self.other_users_table.heading("Prev", text="Prev")
         self.other_users_table["show"] = 'headings'
         # Set column width
-        self.other_users_table.column("Cin", width=100)
         self.other_users_table.column("First name", width=100)
         self.other_users_table.column("Last name", width=100)
         self.other_users_table.column("Prev", width=150)
         self.other_users_table.pack(fill=BOTH, expand=1)  # To show the table
+        # Call get_stuff_cursor
+        self.other_users_table.bind("<ButtonRelease-1>", self.get_other_users_cursor)
+        self.fetch_other_users()
         #****** General settings
         # TODO : factory reset
         self.v = tkinter.StringVar(self.frame_general, "1")
@@ -600,6 +685,7 @@ class Home:
         gender = self.gender.get()
         phone = self.phone.get()
         address = self.address_label_entry.get('1.0', END)
+        field = self.field.get()
 
         if not self.validate_fLName(first_name):
             return messagebox.showinfo("Empty Fields ", "First name not valid")
@@ -619,13 +705,16 @@ class Home:
         if gender == "":
             return messagebox.showinfo("Gender not determined", "Please try to select gender")
 
+        if field == "":
+            return messagebox.showinfo("Field not determined", "Please try to select field")
+
         connection = mysql.connector.connect(host="localhost", user="root", password="password123",
                                              database="g_school")
         cursor = connection.cursor()
 
         try:
-            sqlInsert = "INSERT INTO student_data values(%s,%s,%s,%s,%s,%s,%s)"
-            values = (cne, first_name, last_name, email, gender, phone, address)
+            sqlInsert = "INSERT INTO student_data values(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+            values = (cne, first_name, last_name, email, gender, phone, address, field,"")
             cursor.execute(sqlInsert, values)
             connection.commit()
 
@@ -668,6 +757,7 @@ class Home:
         self.phone.set("")
         self.address_label_entry.delete('1.0', END)
         self.cne_label_entry.focus_set()
+        self.field.set("")
 
     def get_cursor(self, ev):
         cursor_row = self.student_table.focus()
@@ -681,6 +771,7 @@ class Home:
         self.phone.set('0'+str(row[5]))
         self.address_label_entry.delete('1.0', END)
         self.address_label_entry.insert(END, row[6])
+        self.field.set(row[7])
 
     def update_student(self):
         connection = mysql.connector.connect(host="localhost", user="root", password="password123",
@@ -692,6 +783,7 @@ class Home:
         email = self.email.get()
         gender = self.gender.get()
         phone = self.phone.get()
+        field = self.field.get()
 
         if not self.validate_fLName(first_name):
             return messagebox.showinfo("Empty Fields ", "First name not valid")
@@ -711,10 +803,13 @@ class Home:
         if gender == "":
             return messagebox.showinfo("Gender not determined", "Please try to select gender")
 
+        if field == "":
+            return messagebox.showinfo("Field not determined", "Please try to select field")
+
         try:
-            sqlInsert = "UPDATE student_data SET cne = %s, first_name = %s, last_name = %s,email = %s, gender = %s, phone = %s, address = %s WHERE cne = %s or phone = %s"
+            sqlInsert = "UPDATE student_data SET cne = %s, first_name = %s, last_name = %s,email = %s, gender = %s, phone = %s, address = %s, field = %s WHERE cne = %s or phone = %s"
             values = (
-            cne, first_name, last_name, email, gender, phone, self.address_label_entry.get('1.0', END), cne, phone)
+            cne, first_name, last_name, email, gender, phone, self.address_label_entry.get('1.0', END), field, cne, phone)
             cursor.execute(sqlInsert, values)
             connection.commit()
             self.fetch_student_data()
@@ -752,6 +847,32 @@ class Home:
         self.fetch_student_data()
         connection.close()
 
+    def search_student(self):
+        connection = mysql.connector.connect(host="localhost", user="root", password="password123",
+                                             database="g_school")
+        cursor = connection.cursor()
+        if self.student_search.get() == "Cne":
+            if not self.validate_cne_code(self.student_search_entry.get()):
+                return messagebox.showinfo("CNE not valid", "CNE not valid")
+
+        if self.student_search.get() == "Phone":
+            if not self.validate_phone(self.student_search_entry.get()):
+                return messagebox.showinfo("Phone not valid", "Phone not valid")
+
+        if self.student_search.get() == "Email":
+            if not self.validate_email(self.student_search_entry.get()):
+                return messagebox.showinfo("Email not valid", "Email not valid")
+
+        cursor.execute(
+            f"SELECT * FROM Student_data WHERE {self.student_search.get()} = '{self.student_entry_search.get()}'")
+        rows = cursor.fetchall()
+        if len(rows) != 0:
+            self.student_table.delete(*self.student_table.get_children())
+            for row in rows:
+                self.student_table.insert('', END, values=row)
+            connection.commit()
+        connection.close()
+
     ## Stuff main functions
     def add_stuff(self):
 
@@ -786,8 +907,8 @@ class Home:
         cursor = connection.cursor()
 
         try:
-            sqlInsert = "INSERT INTO stuff_data values(%s,%s,%s,%s,%s,%s,%s)"
-            values = (cin, first_name, last_name, email, gender, phone, address)
+            sqlInsert = "INSERT INTO stuff_data values(%s,%s,%s,%s,%s,%s,%s,%s)"
+            values = (cin, first_name, last_name, email, gender, phone, address,"")
             cursor.execute(sqlInsert, values)
             connection.commit()
 
@@ -913,67 +1034,369 @@ class Home:
         self.fetch_stuff_data()
         connection.close()
 
+    def search_stuff(self):
+        connection = mysql.connector.connect(host="localhost", user="root", password="password123",
+                                             database="g_school")
+        cursor = connection.cursor()
+        if self.stuff_search.get() == "Cin":
+            if not self.validate_cin(self.stuff_search_entry.get()):
+                return messagebox.showinfo("CIN not valid", "CIN not valid")
+
+        if self.stuff_search.get() == "Phone":
+            if not self.validate_phone(self.stuff_search_entry.get()):
+                return messagebox.showinfo("Phone not valid", "Phone not valid")
+
+        if self.stuff_search.get() == "Email":
+            if not self.validate_email(self.stuff_search_entry.get()):
+                return messagebox.showinfo("Email not valid", "Email not valid")
+
+        cursor.execute(f"SELECT * FROM Stuff_data WHERE {self.stuff_search.get()} = '{self.stuff_entry_search.get()}'")
+        rows = cursor.fetchall()
+        if len(rows) != 0:
+            self.stuff_table.delete(*self.stuff_table.get_children())
+            for row in rows:
+                self.stuff_table.insert('', END, values=row)
+            connection.commit()
+        connection.close()
+
+    # Export function
+    def export_stuff(self):
+        connection = mysql.connector.connect(host="localhost", user="root", password="password123",
+                                             database="g_school")
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM g_school.Stuff_data")
+        rows = cursor.fetchall()
+        file_path = filedialog.askdirectory()
+        if os.path.isfile(rf"{file_path}\Stuff_data.csv"):
+            os.remove(rf"{file_path}\Stuff_data.csv")
+
+        for row in rows:
+            df = pd.read_sql_query("SELECT * FROM Stuff_data", connection)
+
+            df.to_csv(rf'{file_path}\Stuff_data.csv', index=False)
+
+    def export_student(self):
+        connection = mysql.connector.connect(host="localhost", user="root", password="password123",
+                                             database="g_school")
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM Student_data")
+        rows = cursor.fetchall()
+        file_path = filedialog.askdirectory()
+        if os.path.isfile(rf"{file_path}\Student_data.csv"):
+            os.remove(rf"{file_path}\Student_data.csv")
+
+        for row in rows:
+            df = pd.read_sql_query("SELECT * FROM Student_data", connection)
+
+            df.to_csv(rf'{file_path}\Student_data.csv')
+
+    # User functions
     def add_new_usr(self):
         self.register_window = tkinter.Toplevel(self.window)
         self.register_window.geometry("500x500")
         self.register_window.title("registration form")
 
-        lb1 = Label(self.register_window, text="Enter UserName", width=10, font=("arial", 12))
+        lb1 = Label(self.register_window, text="UserName", width=10, font=("arial", 10))
         lb1.place(x=20, y=20)
-        en1 = Entry(self.register_window)
+        en1 = Entry(self.register_window, textvariable=self.username)
         en1.place(x=200, y=20)
-        lb2 = Label(self.register_window, text="Enter First Name", width=10, font=("arial", 12))
+        lb2 = Label(self.register_window, text="First Name", width=10, font=("arial", 10))
         lb2.place(x=20, y=60)
-        en2 = Entry(self.register_window)
+        en2 = Entry(self.register_window, textvariable=self.user_first_name)
         en2.place(x=200, y=60)
-        lb3 = Label(self.register_window, text="Enter Last Name", width=10, font=("arial", 12))
+        lb3 = Label(self.register_window, text="Last Name", width=10, font=("arial", 10))
         lb3.place(x=20, y=120)
-        en3 = Entry(self.register_window)
+        en3 = Entry(self.register_window, textvariable=self.user_last_name)
         en3.place(x=200, y=120)
 
-        lb3 = Label(self.register_window, text="Enter Email", width=10, font=("arial", 12))
+        lb3 = Label(self.register_window, text="Enter Email", width=10, font=("arial", 10))
         lb3.place(x=19, y=160)
-        en3 = Entry(self.register_window)
-        en3.place(x=200, y=160)
+        en4 = Entry(self.register_window, textvariable=self.user_email)
+        en4.place(x=200, y=160)
 
-        lb4 = Label(self.register_window, text="Contact Number", width=13, font=("arial", 12))
+        lb4 = Label(self.register_window, text="Contact Number", width=13, font=("arial", 10))
         lb4.place(x=19, y=200)
-        en4 = Entry(self.register_window)
-        en4.place(x=200, y=200)
+        en5 = Entry(self.register_window, textvariable=self.user_contact)
+        en5.place(x=200, y=200)
 
-        lb5 = Label(self.register_window, text="Select Gender", width=15, font=("arial", 12))
+        lb5 = Label(self.register_window, text="Select Gender", width=15, font=("arial", 10))
         lb5.place(x=5, y=240)
-        vars = IntVar()
-        Radiobutton(self.register_window, text="Male", padx=5, variable=vars, value=1).place(x=180, y=240)
-        Radiobutton(self.register_window, text="Female", padx=10, variable=vars, value=2).place(x=240, y=240)
+        # vars = IntVar()
+        ttk.Combobox(self.register_window, values=["Male", "Female"], textvariable=self.user_gender).place(x=200, y=240,
+                                                                                                           width=100)
 
-        list_of_cntry = ("Admin", "User", "Student", "Teacher", "Administration")
-        cv = StringVar()
-        drplist = OptionMenu(self.register_window, cv, *list_of_cntry)
-        drplist.config(width=15)
-        cv.set("United States")
-        lb2 = Label(self.register_window, text="Select Identity", width=13, font=("arial", 12))
+        self.identity_combo = ttk.Combobox(self.register_window,
+                                           values=["Admin", "User", "Student", "Teacher", "Administration"],
+                                           textvariable=self.user_identity)
+        self.identity_combo.place(x=200, y=275, width=100)
+        self.identity_combo.set("User")
+        lb2 = Label(self.register_window, text="Select Identity", width=13, font=("arial", 10))
         lb2.place(x=14, y=280)
-        drplist.place(x=200, y=275)
 
-        lb6 = Label(self.register_window, text="Enter Password", width=13, font=("arial", 12))
+        lb6 = Label(self.register_window, text="Enter Password", width=13, font=("arial", 10))
         lb6.place(x=19, y=320)
-        en6 = Entry(self.register_window, show='*')
+        en6 = Entry(self.register_window, show='*', textvariable=self.user_password0)
         en6.place(x=200, y=320)
 
-        lb7 = Label(self.register_window, text="Re-Enter Password", width=15, font=("arial", 12))
+        lb7 = Label(self.register_window, text="Re-Enter Password", width=15, font=("arial", 10))
         lb7.place(x=21, y=360)
-        en7 = Entry(self.register_window, show='*')
+        en7 = Entry(self.register_window, show='*', textvariable=self.user_password1)
         en7.place(x=200, y=360)
 
-        Button(self.register_window, text="Register", width=10).place(x=200, y=400)
+        Button(self.register_window, text="Register", width=10, fg="#001433", bg="#00ff80",
+               command=self.register_user).place(x=200, y=400)
+        self.register_window.attributes('-topmost', 1)  # Makes the window show above all the others
+        self.register_window.attributes('-topmost', 0)
         self.register_window.mainloop()
+
+    def register_user(self):
+        if not self.validate_fLName(self.user_first_name.get()):
+            return messagebox.showinfo("Empty Fields ", "First name not valid")
+        if not self.validate_fLName(self.user_last_name.get()):
+            return messagebox.showinfo("Empty Fields ", "Last name not valid")
+        if not self.validate_email(self.user_email.get()):
+            return messagebox.showinfo("Email not valid", "Email not valid")
+        if self.user_gender.get() == "":
+            return messagebox.showinfo("Gender not determined", "Please try to select gender")
+        if self.user_password0 == "":
+            return messagebox.showinfo("Empty field", "try to fill the password field")
+        if self.user_password1 == "":
+            return messagebox.showinfo("Empty field", "try to fill the password field")
+        if self.user_password0.get() != self.user_password1.get():
+            return messagebox.showinfo("Password error", "Please try to enter the same password")
+
+        connection = mysql.connector.connect(host="localhost", user="root", password="password123",
+                                             database="g_school")
+        cursor = connection.cursor()
+        try:
+            sqlInsert = "INSERT INTO users values(%s,%s,%s,%s,%s,%s,%s,%s)"
+            encrypted_password = hashlib.sha256(self.user_password1.get().encode()).hexdigest()
+            values = (self.username.get(), encrypted_password, self.user_identity.get(), self.user_email.get(),
+                      self.user_contact.get(), False, self.user_first_name.get(), self.user_last_name.get())
+            cursor.execute(sqlInsert, values)
+            connection.commit()
+
+            messagebox.showinfo("Information", "Data saved successfully")
+            self.user_password0.set("")
+            self.username.set("")
+            self.user_first_name.set("")
+            self.user_last_name.set("")
+            self.user_email.set("")
+            self.user_contact.set("")
+            self.user_password1.set("")
+            self.user_gender.set("")
+
+
+
+        except Exception as e:
+            messagebox.showinfo("sql error:", f"{e}")
+            connection.rollback()
+
+        connection.commit()
+        self.fetch_other_users()
+        connection.close()
+
+    def fetch_other_users(self):
+        connection = mysql.connector.connect(host="localhost", user="root", password="password123",
+                                             database="g_school")
+        cursor = connection.cursor()
+        cursor.execute("SELECT username,username,type FROM users")
+        rows = cursor.fetchall()
+        if len(rows) != 0:
+            self.other_users_table.delete(*self.other_users_table.get_children())
+            for row in rows:
+                self.other_users_table.insert('', END, values=row)
+            connection.commit()
+        connection.close()
+
+    def get_other_users_cursor(self):
+        cursor_row = self.other_users_table.focus()
+        contents = self.other_users_table.item(cursor_row)
+        row = contents['values']
+        self.cne.set(row[0])
+        self.first_name.set(row[1])
+        self.last_name.set(row[2])
+        self.email.set(row[3])
+        self.gender.set(row[4])
+        self.phone.set(row[5])
+        self.address_label_entry.delete('1.0', END)
+        self.address_label_entry.insert(END, row[6])
+
+    def update_user_info(self):
+        connection = mysql.connector.connect(host="localhost", user="root", password="password123",
+                                             database="g_school")
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM users WHERE keepme =1")
+        result = cursor.fetchall()
+
+        self.register_window = tkinter.Toplevel(self.window)
+        self.register_window.geometry("500x500")
+        self.register_window.title("registration form")
+
+        lb1 = Label(self.register_window, text="UserName", width=10, font=("arial", 10))
+        lb1.place(x=20, y=20)
+        en1 = Entry(self.register_window, textvariable=self.username)
+        en1.place(x=200, y=20)
+        lb2 = Label(self.register_window, text="First Name", width=10, font=("arial", 10))
+        lb2.place(x=20, y=60)
+        en2 = Entry(self.register_window, textvariable=self.user_first_name)
+        en2.place(x=200, y=60)
+        lb3 = Label(self.register_window, text="Last Name", width=10, font=("arial", 10))
+        lb3.place(x=20, y=120)
+        en3 = Entry(self.register_window, textvariable=self.user_last_name)
+        en3.place(x=200, y=120)
+
+        lb3 = Label(self.register_window, text="Enter Email", width=10, font=("arial", 10))
+        lb3.place(x=19, y=160)
+        en4 = Entry(self.register_window, textvariable=self.user_email)
+        en4.place(x=200, y=160)
+
+        lb4 = Label(self.register_window, text="Contact Number", width=13, font=("arial", 10))
+        lb4.place(x=19, y=200)
+        en5 = Entry(self.register_window, textvariable=self.user_contact)
+        en5.place(x=200, y=200)
+
+        lb5 = Label(self.register_window, text="Select Gender", width=15, font=("arial", 10))
+        lb5.place(x=5, y=240)
+        # vars = IntVar()
+        ttk.Combobox(self.register_window, values=["Male", "Female"], textvariable=self.user_gender).place(x=200, y=240,
+                                                                                                           width=100)
+
+        self.identity_combo = ttk.Combobox(self.register_window,
+                                           values=["Admin", "User", "Student", "Teacher", "Administration"],
+                                           textvariable=self.user_identity)
+        self.identity_combo.place(x=200, y=275, width=100)
+        self.identity_combo.set("User")
+        lb2 = Label(self.register_window, text="Select Identity", width=13, font=("arial", 10))
+        lb2.place(x=14, y=280)
+
+        lb6 = Label(self.register_window, text="Enter Password", width=13, font=("arial", 10))
+        lb6.place(x=19, y=320)
+        en6 = Entry(self.register_window, show='*', textvariable=self.user_password0)
+        en6.place(x=200, y=320)
+
+        lb7 = Label(self.register_window, text="Re-Enter Password", width=15, font=("arial", 10))
+        lb7.place(x=21, y=360)
+        en7 = Entry(self.register_window, show='*', textvariable=self.user_password1)
+        en7.place(x=200, y=360)
+
+        self.username.set(f"{result[0][0]}")
+        self.user_password0.set("")
+        self.user_password1.set("")
+        self.user_identity.set(f"{result[0][2]}")
+        self.user_email.set(f"{result[0][3]}")
+        self.user_contact.set(f"{result[0][4]}")
+        self.user_first_name.set(f"{result[0][6]}")
+        self.user_last_name.set(f"{result[0][7]}")
+
+        # self.username.set()
+
+        Button(self.register_window, text="Register", width=10, fg="#001433", bg="#00ff80",
+               command=self.update_user).place(x=200, y=400)
+        self.register_window.attributes('-topmost', 1)  # Makes the window show above all the others
+        self.register_window.attributes('-topmost', 0)
+        self.register_window.mainloop()
+
+    def update_user(self):
+        if not self.validate_fLName(self.user_first_name.get()):
+            return messagebox.showinfo("Empty Fields ", "First name not valid")
+        if not self.validate_fLName(self.user_last_name.get()):
+            return messagebox.showinfo("Empty Fields ", "Last name not valid")
+        if not self.validate_email(self.user_email.get()):
+            return messagebox.showinfo("Email not valid", "Email not valid")
+        if self.user_gender.get() == "":
+            return messagebox.showinfo("Gender not determined", "Please try to select gender")
+        if self.user_password0 == "":
+            return messagebox.showinfo("Empty field", "try to fill the password field")
+        if self.user_password1 == "":
+            return messagebox.showinfo("Empty field", "try to fill the password field")
+        if self.user_password0.get() != self.user_password1.get():
+            return messagebox.showinfo("Password error", "Please try to enter the same password")
+
+        connection = mysql.connector.connect(host="localhost", user="root", password="password123",
+                                             database="g_school")
+        cursor = connection.cursor()
+        try:
+            sqlInsert = "UPDATE users SET username=%s,passwordd=%s,type=%s,email=%s,phone=%s,firstname=%s,lastname=%s,gender=%s WHERE keepme=1"
+            encrypted_password = hashlib.sha256(self.user_password1.get().encode()).hexdigest()
+            global new_user_name
+            new_user_name = self.username.get()
+            values = (self.username.get(), encrypted_password, self.user_identity.get(), self.user_email.get(),
+                      self.user_contact.get(), self.user_first_name.get(), self.user_last_name.get(),
+                      self.user_gender.get())
+            cursor.execute(sqlInsert, values)
+            connection.commit()
+
+            messagebox.showinfo("Information", "Data saved successfully")
+            self.user_password0.set("")
+            self.username.set("")
+            self.user_first_name.set("")
+            self.user_last_name.set("")
+            self.user_email.set("")
+            self.user_contact.set("")
+            self.user_password1.set("")
+            self.user_gender.set("")
+        except Exception as e:
+            messagebox.showinfo("sql error:", f"{e}")
+            connection.rollback()
+
+        connection.commit()
+        cursor.execute("SELECT * FROM users WHERE username = %s ", (new_user_name,))
+        login.Login.current_user = cursor.fetchone()
+        self.current_user_table.delete(*self.current_user_table.get_children())
+
+        self.user_info = (login.Login.current_user[0], login.Login.current_user[6],
+                          login.Login.current_user[7], login.Login.current_user[3],
+                          login.Login.current_user[4], login.Login.current_user[2])
+        self.current_user_table.insert('', 'end', values=self.user_info)
+
+        connection.close()
+        self.register_window.destroy()
+
+    def change_password_gui(self):
+        # Create a top-level window
+        top = tkinter.Toplevel()
+        top.title("Change Password")
+
+        # Add a label for the old password
+        old_password_label = tkinter.Label(top, text="Old Password")
+        old_password_label.pack()
+
+        # Add an entry for the old password
+        old_password_entry = tkinter.Entry(top, show="*")
+        old_password_entry.pack()
+
+        # Add a label for the new password
+        new_password_label = tkinter.Label(top, text="New Password")
+        new_password_label.pack()
+
+        # Add an entry for the new password
+        new_password_entry = tkinter.Entry(top, show="*")
+        new_password_entry.pack()
+
+        # Add a button to change the password
+        change_password_button = tkinter.Button(top, text="Change Password", command=self.change_password)
+        change_password_button.pack()
+
+        # Start the tkinter event loop
+        top.mainloop()
+
+    def change_password(self):
+        pass
 
     def upload_student_img(self):
         file_types = [('jpg Images', '*.jpg'), ('jpeg Images', '*.jpeg')]
         file = tkinter.filedialog.askopenfilename(filetypes=file_types)
         if file:
-            pass
+            self.image_student_path = file
+            self.img_lbl_student.destroy()
+            self.img_student = (pimg.open(file)).resize((300, 205), pimg.ANTIALIAS)
+            self.img_student = ImageTk.PhotoImage(self.img_student)
+            self.img_fr_student = tkinter.Frame(self.students_tab)
+            self.img_fr_student.place(x=780, y=23, width=110, height=140)
+            self.img_lbl_student = tkinter.Label(self.img_fr_student, image=self.img_student)
+            self.img_lbl_student.pack()
+
             # TODO : import img to db and to frame student
 
     def upload_stuff_img(self):
@@ -983,6 +1406,8 @@ class Home:
             pass
             # TODO : import img to db and to frame stuff
 
+
+
     def start(self):
         self.window.mainloop()
-
+###UT
