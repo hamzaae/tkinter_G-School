@@ -167,8 +167,6 @@ class DashBoard:
 
         self.plot(self.stuff_tab)
 
-
-
     def show_time(self):
         self.time = time.strftime("%H:%M:%S")
         self.date = time.strftime('%Y/%m/%d')
@@ -206,8 +204,6 @@ class DashBoard:
         self.canvas = FigureCanvasTkAgg(self.fig0, master=window)
         self.canvas.get_tk_widget().pack()
         self.canvas.draw()
-
-
 
     def plot1(self,window):
         self.vals = np.array(

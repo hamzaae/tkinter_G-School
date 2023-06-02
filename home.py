@@ -106,7 +106,7 @@ class Home:
         ############# STUDENTS Tab #############
         # TODO : import and export csv
         # student image
-        self.img_student = (pimg.open("db\\admin.jpg")).resize((300, 205), pimg.ANTIALIAS)
+        self.img_student = (pimg.open("media\\man.png")).resize((300, 205), pimg.ANTIALIAS)
         self.img_student = ImageTk.PhotoImage(self.img_student)
         self.img_fr_student= tkinter.Frame(self.students_tab)
         self.img_fr_student.place(x=780, y=23, width=110, height=140)
@@ -248,7 +248,7 @@ class Home:
 
         ############# HR Tab #############
         # staff image
-        self.img_staff = (pimg.open("db\\admin.jpg")).resize((300, 205), pimg.ANTIALIAS)
+        self.img_staff = (pimg.open("media\\man.png")).resize((300, 205), pimg.ANTIALIAS)
         self.img_staff = ImageTk.PhotoImage(self.img_staff)
         self.img_fr_staff = tkinter.Frame(self.hr_tab)
         self.img_fr_staff.place(x=780, y=23, width=110, height=140)
@@ -313,11 +313,11 @@ class Home:
         ## Clear Button
         self.stuff_button = tkinter.Button(self.stuff_button_frame, text="Clear", fg="#001433", bg="green", width=20,command=self.clear_stuff)
         self.stuff_button.grid(row=0, column=3, padx=10, pady=10)
-        self.import_csv_button = tkinter.Button(self.stuff_button_frame, text="Import from CSV", fg="#001433", bg="green", width=20,command=self.clear_stuff)
-        self.import_csv_button.grid(row=0, column=4, padx=10, pady=10)
+        # self.import_csv_button = tkinter.Button(self.stuff_button_frame, text="Import from CSV", fg="#001433", bg="green", width=20,command=self.clear_stuff)
+        # self.import_csv_button.grid(row=0, column=4, padx=10, pady=10)
         ## import Button
         self.import_csv_button_hr = tkinter.Button(self.hr_tab, text="Import from CSV", fg="#001433", bg="#00ffff",
-                                                width=15, command=self.clear_stuff)
+                                                width=15, command=self.import_stuff)
         self.import_csv_button_hr.place(x=770, y=460)
         ## Export Button
         self.export_csv_button_hr = tkinter.Button(self.hr_tab, text="Export to CSV", fg="#001433", bg="#00ff80", width=15,
@@ -488,7 +488,7 @@ class Home:
                         command=self.start_logfile)
         self.log_btn.place(x=600, y=28)
         self.factory_btn = tkinter.Button(self.frame_general, width=20, pady=7,
-                        text='Factory reset', bg='#f54747', fg='white', border=0,)
+                        text='Factory reset', bg='#f54747', fg='white', border=0,command=self.factory_reset)
         self.factory_btn.place(x=759, y=75)
 
         ############# ABOUT Tab #############
@@ -622,7 +622,6 @@ class Home:
         #dashboard
         self.home.set_dark_mode()
 
-    #0
     def mail_receive(self,Subject, To, Message):
         email_user = login.Login.current_user[4]
         em = EmailMessage()
@@ -635,7 +634,6 @@ class Home:
             smtp.login(self.email_sender,self.email_password)
             smtp.sendmail(self.email_sender,email_user,em.as_string())
 
-    #0
     def add_usr_img(self):
         self.register_new_user_window = tkinter.Toplevel(self.window)
         self.register_new_user_window.geometry("600x520")
@@ -657,7 +655,6 @@ class Home:
         self.register_new_user_window.destroy()
         login.Login.app.end_video()
 
-    #0
     def signout(self):
         self.window.destroy()
         with open(login.Login.log_path, 'a') as f:
@@ -1076,6 +1073,37 @@ class Home:
 
             df.to_csv(rf'{file_path}\Stuff_data.csv', index=False)
 
+    def import_stuff(self):
+        # Prompt the user to select the CSV file to import
+        root = Tk()
+        root.withdraw()
+        file_path = filedialog.askopenfilename()
+
+        # Establish a connection to the MySQL database
+        db = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="password123",
+            database="g_school"
+        )
+
+        # Create a cursor object to interact with the database
+        cursor = db.cursor()
+
+        # Open the CSV file and insert the data into the table
+        with open(file_path, 'r') as csvfile:
+            csvreader = csv.DictReader(csvfile)
+            for row in csvreader:
+                insert_query = "INSERT INTO stuff_data (cin, first_name, last_name, email, gender, phone, address, imagepath) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+                values = (row['cin'], row['first_name'], row['last_name'], row['email'], row['gender'], row['phone'],
+                          row['address'], row['imagepath'])
+                cursor.execute(insert_query, values)
+
+        # Commit the changes to the database and close the connection
+        db.commit()
+        db.close()
+        self.fetch_stuff_data()
+
     def export_student(self):
         connection = mysql.connector.connect(host="localhost", user="root", password="password123",
                                              database="g_school")
@@ -1121,8 +1149,6 @@ class Home:
         db.commit()
         db.close()
         self.fetch_student_data()
-
-
 
     # User functions
     def add_new_usr(self):
@@ -1203,10 +1229,10 @@ class Home:
                                              database="g_school")
         cursor = connection.cursor()
         try:
-            sqlInsert = "INSERT INTO users values(%s,%s,%s,%s,%s,%s,%s,%s)"
+            sqlInsert = "INSERT INTO users values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
             encrypted_password = hashlib.sha256(self.user_password1.get().encode()).hexdigest()
             values = (self.username.get(), encrypted_password, self.user_identity.get(), self.user_email.get(),
-                      self.user_contact.get(), False, self.user_first_name.get(), self.user_last_name.get())
+                      self.user_contact.get(), False, self.user_first_name.get(), self.user_last_name.get(), self.user_gender.get() ,None)
             cursor.execute(sqlInsert, values)
             connection.commit()
 
@@ -1440,6 +1466,19 @@ class Home:
             pass
             # TODO : import img to db and to frame stuff
 
+    def factory_reset(self):
+        msg_box = messagebox.askquestion('Reset Application', 'Are you sure you want to delete all the informations and do factory reset?',
+                                            icon='warning')
+        if msg_box == 'yes':
+            self.mycursor.execute("DELETE FROM student_data")
+            self.mycursor.execute("DELETE FROM stuff_data")
+            self.mycursor.execute("DELETE FROM users")
+            messagebox.showinfo("Done","Factory reset done successfully, please insert new admin informations!")
+            login.Login.current_user = None
+            self.mydb.commit()
+
+            self.signout()
+
     def start(self):
         self.window.mainloop()
-###UT
+

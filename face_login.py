@@ -25,7 +25,6 @@ class App_face:
         )
         self.mycursor = self.mydb.cursor()
 
-
     def add_webcam(self, label):
         if 'cap' not in self.__dict__:
             self.cap = cv2.VideoCapture(1)
@@ -72,7 +71,6 @@ class App_face:
                 main_home.start()
         os.remove(unkown_img)
 
-
     def end_video(self):
         if 'cap' in self.__dict__:
             self.cap.release()
@@ -103,13 +101,6 @@ class App_face:
 
         self.register_new_user_capture = self.most_recent_capture_arr.copy()
 
-    def start(self, window, x, y):
-        self.webcam_label = util.get_img_label(window)
-        self.webcam_label.place(x=0, width=x, height=y)
-
-        self.add_webcam(self.webcam_label)
-        window.mainloop()
-
     def accept_register_new_user(self,window):
 
         name = login.Login.current_user[1]
@@ -118,4 +109,11 @@ class App_face:
         util.msg_box('Success!', 'User was registered successfully !')
         self.end_video()
         window.destroy()
+
+    def start(self, window, x, y):
+        self.webcam_label = util.get_img_label(window)
+        self.webcam_label.place(x=0, width=x, height=y)
+
+        self.add_webcam(self.webcam_label)
+        window.mainloop()
 
